@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sports Alerts</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    h1 {
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 8px;
+      text-align: center;
+      color: #ff2d55;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #aaaaaa;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .btn-primary {
+      background: #007aff;
+      color: white;
+    }
+    .btn-success {
+      background: #34c759;
+      color: white;
+      margin-top: 15px;
+    }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .status-box {
+      font-size: 13px;
+      color: #8e8e93;
+      background: #2c2c2e;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      text-align: center;
+      word-break: break-all;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #333;
+      margin: 24px 0;
+    }
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #eaeaea;
+      display: block;
+      margin-bottom: 6px;
+    }
+    select {
+      width: 100%;
+      padding: 12px;
+      background: #2c2c2e;
+      border: 1px solid #3d3d41;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Sports Alerts Control</h1>
+    <p class="subtitle">Live Real-Time PWA Testing Hub</p>
+
+    <button id="btn-subscribe" class="btn btn-primary">
+      1. Grant Push Permission
+    </button>
+    <div id="sub-status" class="status-box">Status: Push client unregistered</div>
+
+    <hr>
+
+    <label for="team-dropdown">Choose Target NFL Team</label>
+    <select id="team-dropdown">
+      <option value="">Connecting to Live Stream...</option>
+    </select>
+
+    <label for="alert-type">Payload Feed Source</label>
+    <select id="alert-type">
+      <option value="scores">Live Scoreboard Tracker</option>
+      <option value="news">Latest Team News Updates</option>
+    </select>
+
+    <button id="btn-trigger" class="btn btn-success" disabled>
+      2. Broadcast Live Push Notification
+    </button>
+  </div>
+
+  <script>
+    const PUBLIC_VAPID_KEY = 'BC-LY0azo2sZzvZ4ZoQnZwnpLpIwhrOFsDTQ9YbiuSdWLNqKQYdNGmMM9Am6IH-Zd9rBPg7gcXOEYiFyNsz2Fh8';
+    let globalSubscription = null;
+
+    async function loadTeams() {
+      const dropdown = document.getElementById('team-dropdown');
+      try {
+        const res = await fetch('/.netlify/functions/send-alert');
+        const data = await res.json();
+        dropdown.innerHTML = '';
+        
+        const teamList = data.sports[0].leagues[0].teams;
+        teamList.forEach(item => {
+          let opt = document.createElement('option');
+          opt.value = item.team.id;
+          opt.innerText = item.team.displayName;
+          dropdown.appendChild(opt);
+        });
+      } catch (err) {
+        console.error("Failed to load dynamic team stream:", err);
+        dropdown.innerHTML = '<option value="">Error pulling dynamic feed</option>';
+      }
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    document.getElementById('btn-subscribe').addEventListener('click', async () => {
+      const statusBox = document.getElementById('sub-status');
+      statusBox.innerText = "Attempting worker handshakes...";
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        try {
+          const reg = await navigator.serviceWorker.register('/sw.js');
+          await navigator.serviceWorker.ready;
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+          });
+
+          const subJson = JSON.parse(JSON.stringify(sub));
+          globalSubscription = subJson;
+          
+          statusBox.innerText = "Registered: Active push channel online";
+          statusBox.style.color = "#34c759";
+          document.getElementById('btn-trigger').disabled = false;
+          localStorage.setItem('saved_sub', JSON.stringify(subJson));
+        } catch (err) {
+          statusBox.innerText = "Error: " + err.message;
+          statusBox.style.color = "#ff3b30";
+        }
+      } else {
+        statusBox.innerText = "Unsupported environment.";
+        statusBox.style.color = "#ff9500";
+      }
+    });
+
+    document.getElementById('btn-trigger').addEventListener('click', async () => {
+      if (!globalSubscription) return;
+      const teamId = document.getElementById('team-dropdown').value;
+      const type = document.getElementById('alert-type').value;
+      try {
+        await fetch('/.netlify/functions/send-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: globalSubscription,
+            teamId: teamId,
+            type: type
+          })
+        });
+      } catch (err) {
+        console.error("Dispatch failure:", err);
+      }
+    });
+
+    loadTeams();
+    if (localStorage.getItem('saved_sub')) {
+      globalSubscription = JSON.parse(localStorage.getItem('saved_sub'));
+      document.getElementById('sub-status').innerText = "Session restored from internal state";
+      document.getElementById('sub-status').style.color = "#34c759";
+      document.getElementById('btn-trigger').disabled = false;
+    }
+  </script>
+</body>
+</html>
