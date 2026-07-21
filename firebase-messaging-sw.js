@@ -2,11 +2,11 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyB_ExrYOQfmaYQqqS9lof8klY9Y8Qbrbc8",
   authDomain: "webpush721.firebaseapp.com",
   projectId: "webpush721",
   messagingSenderId: "638081013513",
-  appId: "YOUR_APP_ID"
+  appId: "1:638081013513:web:88960958d7e8f12be325d8"
 });
 
 const messaging = firebase.messaging();
