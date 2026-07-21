@@ -1,90 +1,24 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debug FCM - Sans Framework</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h3 { margin-top: 0; color: #039be5; }
-        textarea, input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: monospace; }
-        button { background-color: #039be5; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #0277bd; }
-        .result { background: #e3f2fd; padding: 15px; border-left: 5px solid #039be5; word-break: break-all; margin-top: 15px; display: none; }
-        code { background: #eee; padding: 2px 5px; border-radius: 3px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webpush721 Web App</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+    button { background: #039be5; color: white; border: none; padding: 12px 24px; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
+    button:hover { background: #0288d1; }
+    #status { margin-top: 15px; color: #555; font-size: 0.9rem; font-weight: bold; }
+  </style>
 </head>
 <body>
-
-    <div class="card">
-        <h3>1. Token Firebase</h3>
-        <button id="btnInit">Obtenir le Token</button>
-    </div>
-
-    <div id="resultBox" class="result">
-        <strong>Statut :</strong> <span id="status">Opération en cours...</span><br><br>
-        <strong>Votre Token FCM :</strong><br>
-        <code id="tokenDisplay"></code>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-
-        const btn = document.getElementById('btnInit');
-        const firebaseConfig = {
-          apiKey: "AIzaSyAdjISWU8mey_5y94PBewHmBbbYia8bgsU",
-          authDomain: "test-8acf8.firebaseapp.com",
-          projectId: "test-8acf8",
-          storageBucket: "test-8acf8.firebasestorage.app",
-          messagingSenderId: "366969925622",
-          appId: "1:366969925622:web:ed1eb4ddf10d2763db61d7"
-        };
-        const vapidKey = "BEEHaY_IEYsIa7uIQ4X6qlXXCMJgI5Gz2UDAzY-xh6-xIU-q5-IIc-Bcdj8NS1nQNr4AaeL2VC1otVfVZTu1Eyc";
-        const resultBox = document.getElementById('resultBox');
-        const tokenDisplay = document.getElementById('tokenDisplay');
-        const statusText = document.getElementById('status');
-
-        btn.addEventListener('click', async () => {
-            try {
-                resultBox.style.display = "block";
-                statusText.innerText = "Initialisation...";
-
-                const app = initializeApp(firebaseConfig);
-                const messaging = getMessaging(app);
-
-                statusText.innerText = "Demande de permission au navigateur...";
-
-                // Demande de token
-                const registration = await navigator.serviceWorker.register(
-                  "./firebase-messaging-sw.js"
-                );
-                
-                const currentToken = await getToken(messaging, {
-                  vapidKey: vapidKey,
-                  serviceWorkerRegistration: registration
-                });
-
-                if (currentToken) {
-                    statusText.innerText = "Succès ! Token généré.";
-                    tokenDisplay.innerText = currentToken;
-                    console.log("Token FCM :", currentToken);
-                } else {
-                    statusText.innerText = "Permission refusée ou erreur de token.";
-                }
-
-                // Gestion des messages reçus en direct (onglet actif)
-                onMessage(messaging, (payload) => {
-                    console.log('Message reçu (Foreground):', payload);
-                    alert(`Notification reçue: ${payload.notification.title}\n${payload.notification.body}`);
-                });
-
-            } catch (error) {
-                statusText.innerText = "Erreur : " + error.message;
-                console.error(error);
-            }
-        });
-    </script>
+  <div class="card">
+    <h1>webpush721 is Active!</h1>
+    <p>Your Firebase Web App is initialized and ready to collect telemetry.</p>
+    <button id="actionBtn">Track Interaction</button>
+    <p id="status">Loading application...</p>
+  </div>
+  <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
