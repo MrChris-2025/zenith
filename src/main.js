@@ -36,7 +36,7 @@ if (notiBtn && tokenDisplay) {
       try {
         // Retrieve the FCM registration token 
         const token = await getToken(messaging, {
-          vapidKey: "YOUR_PUBLIC_VAPID_KEY" // Generate this in Settings > Cloud Messaging > Web Push certificates
+          vapidKey: "BEgs6yLKrhZ9Ayb_R4jRVkEmwplVWgM4vGwXojCDCoyw1fvb-qaADXv_j-Xi5KRX4_VQqRxlxLuXoD5g09vQWlg" // Generate this in Settings > Cloud Messaging > Web Push certificates
         });
         
         if (token) {
