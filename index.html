@@ -6,7 +6,7 @@
   <title>Sports Scoreboard & Schedules PWA</title>
   
   <link rel="apple-touch-icon" sizes="512x512" href="https://hcforever.nekoweb.org/mo2.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.webmanifest">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,12 @@
       --accent-color: #38bdf8;
       --accent-hover: #0284c7;
       --pinned-border: #f59e0b;
-      --alert-color: #ff9100;
+
+      /* Button Design System */
+      --btn-bg: rgba(255, 255, 255, 0.08);
+      --btn-border: rgba(255, 255, 255, 0.15);
+      --btn-radius: 12px;
+      --btn-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -84,29 +89,53 @@
       padding: 0 1rem;
     }
 
-    .controls input, .controls select, button {
-      background: rgba(255, 255, 255, 0.08);
+    .controls input, .controls select {
+      background: var(--btn-bg);
       color: var(--text-color);
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--btn-border);
       padding: 0.5rem 1rem;
-      border-radius: 12px;
+      border-radius: var(--btn-radius);
       font-size: 0.85rem;
       backdrop-filter: blur(4px);
       outline: none;
-      transition: all 0.2s ease;
+      transition: var(--btn-transition);
     }
 
     .controls input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1);
     }
 
+    /* Standard Base Button Styles */
     button {
-      border-radius: 20px;
-      cursor: pointer;
+      background: var(--btn-bg);
+      color: var(--text-color);
+      border: 1px solid var(--btn-border);
+      padding: 0.5rem 1rem;
+      border-radius: var(--btn-radius);
+      font-size: 0.85rem;
       font-weight: 500;
+      backdrop-filter: blur(4px);
+      outline: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: var(--btn-transition);
+      user-select: none;
     }
 
-    button.active, button:hover {
+    button:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.active {
       background: var(--accent-color);
       border-color: var(--accent-color);
       color: #0f172a;
@@ -165,37 +194,26 @@
       letter-spacing: 0.5px;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 0.3rem;
-    }
-
-    .pin-btn, .alert-btn, .team-alert-btn {
-      background: none;
+    /* Icon-Only Buttons */
+    .pin-btn, .modal-close, .toast-btn {
+      background: transparent;
       border: none;
+      padding: 4px;
+      border-radius: 6px;
       color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 0 6px;
       backdrop-filter: none;
-      font-weight: 600;
+      line-height: 1;
     }
 
-    .pin-btn.active, .pin-btn:hover {
+    .pin-btn {
+      font-size: 1.2rem;
+    }
+
+    .pin-btn:hover, .pin-btn.active {
       color: var(--pinned-border);
-      background: none;
+      background: rgba(245, 158, 11, 0.15);
       box-shadow: none;
-    }
-
-    .alert-btn.active, .alert-btn:hover, .team-alert-btn.active, .team-alert-btn:hover {
-      color: var(--alert-color);
-      background: none;
-      box-shadow: none;
-    }
-
-    .team-alert-btn {
-      font-size: 0.75rem;
-      margin-left: 0.3rem;
+      transform: none;
     }
 
     .team {
@@ -210,6 +228,17 @@
       gap: 0.6rem;
     }
 
+    .team-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .team-name {
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
     .team-logo {
       width: 28px;
       height: 28px;
@@ -217,9 +246,9 @@
     }
 
     .team-record {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      margin-left: 0.3rem;
+      line-height: 1.2;
     }
 
     .score {
@@ -227,11 +256,11 @@
       font-size: 1.2rem;
     }
 
+    /* Streamlined Card Action Button Layout */
     .card-actions {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.5rem;
       margin-top: 0.4rem;
-      flex-wrap: wrap;
     }
 
     .card-actions button {
@@ -239,6 +268,29 @@
       padding: 0.4rem 0.6rem;
       border-radius: 8px;
       flex: 1;
+      white-space: nowrap;
+    }
+
+    .btn-push {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .btn-push:hover {
+      background: rgba(34, 197, 94, 0.25);
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-push.active {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .btn-push.active:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
     }
 
     /* Glassmorphism Modal */
@@ -294,19 +346,14 @@
     }
 
     .modal-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
       font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
     }
 
     .modal-close:hover {
       color: var(--text-color);
-      background: none;
+      background: rgba(255, 255, 255, 0.1);
       box-shadow: none;
+      transform: none;
     }
 
     .loading, .error {
@@ -327,17 +374,18 @@
     /* Glassmorphism Toast */
     #toast-container {
       position: fixed;
-      bottom: 20px;
+      top: 20px;
       right: 20px;
       z-index: 1000;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-width: 320px;
+      max-width: 380px;
     }
 
     .toast {
-      background: rgba(15, 23, 42, 0.9);
+      position: relative;
+      background: rgba(15, 23, 42, 0.95);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       color: #fff;
@@ -347,12 +395,110 @@
       border-left: 4px solid var(--accent-color);
       box-shadow: var(--glass-shadow);
       font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
       animation: fadeIn 0.3s ease;
+      transition: border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+    }
+
+    .toast::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(56, 189, 248, 0.15);
+      z-index: 0;
+      animation: progressCountdown 10s linear forwards;
+    }
+
+    .toast.pinned::before {
+      animation-play-state: paused;
+      background: rgba(245, 158, 11, 0.15);
+      width: 100% !important;
+    }
+
+    .toast.pinned {
+      border-left-color: var(--pinned-border);
+    }
+
+    .toast-logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .toast-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex-grow: 1;
+      z-index: 1;
+    }
+
+    .toast-event-type {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toast.pinned .toast-event-type {
+      color: var(--pinned-border);
+    }
+
+    .toast-score {
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    .toast-detail {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .toast-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 1;
+    }
+
+    .toast-btn:hover {
+      color: var(--text-color);
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .toast-pin-btn:hover, .toast.pinned .toast-pin-btn {
+      color: var(--pinned-border);
+    }
+
+    .toast-dismiss-btn:hover {
+      color: #f87171;
+    }
+
+    .toast-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes progressCountdown {
+      from { width: 100%; }
+      to { width: 0%; }
     }
   </style>
 </head>
@@ -362,9 +508,9 @@
     <h1>Sports Scoreboard & Schedules</h1>
     
     <nav id="league-nav">
-      <button data-sport="football" data-league="nfl" class="active">NFL</button>
+      <button data-sport="baseball" data-league="mlb" class="active">MLB</button>
+      <button data-sport="football" data-league="nfl">NFL</button>
       <button data-sport="basketball" data-league="nba">NBA</button>
-      <button data-sport="baseball" data-league="mlb">MLB</button>
       <button data-sport="hockey" data-league="nhl">NHL</button>
       <button data-sport="soccer" data-league="eng.1">Premier League</button>
     </nav>
@@ -378,7 +524,7 @@
         <option value="3">Postseason (3)</option>
       </select>
       <button id="apply-filters">Apply Filters</button>
-      <button id="global-push-btn" style="background: var(--alert-color); color: #0f172a; border-color: var(--alert-color);">Enable Push Alerts</button>
+      <button id="global-push-btn">Enable Push Alerts</button>
     </div>
   </header>
 
@@ -401,6 +547,7 @@
   <div id="toast-container"></div>
 
   <script type="module">
+    // --- FIREBASE IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
@@ -424,68 +571,86 @@
     let fcmToken = localStorage.getItem('fcmToken') || null;
     let subscribedTopics = new Set(JSON.parse(localStorage.getItem('subscribedTopics') || '[]'));
 
-    let currentSport = 'football';
-    let currentLeague = 'nfl';
+    // App state
+    const VAPID_PUBLIC_KEY = 'BEgs6yLKrhZ9Ayb_R4jRVkEmwplVWgM4vGwXojCDCoyw1fvb-qaADXv_j-Xi5KRX4_VQqRxlxLuXoD5g09vQWlg';
+
+    let currentSport = 'baseball';
+    let currentLeague = 'mlb';
     let pollInterval = null;
     let countdownInterval = null;
     let activeModalView = null;
+    let userPushSubscription = null;
     
     let gameCache = new Map();
+    let liveToastMap = new Map();
+    let startAlertedGames = new Set();
+    let finalAlertedGames = new Set(JSON.parse(localStorage.getItem('finalAlertedGames') || '[]'));
+    let seenPlayIds = new Set();
     let pinnedGames = new Set(JSON.parse(localStorage.getItem('pinnedGames') || '[]'));
+    let pushGames = new Set(JSON.parse(localStorage.getItem('pushGames') || '[]'));
 
     const scoreboardEl = document.getElementById('scoreboard');
     const navEl = document.getElementById('league-nav');
     const modalEl = document.getElementById('modal');
     const modalTitleEl = document.getElementById('modal-title');
     const modalBodyEl = document.getElementById('modal-body');
-    const pushBtn = document.getElementById('global-push-btn');
 
-    if (fcmToken) {
-      pushBtn.textContent = "Alerts Active";
-      pushBtn.style.background = "rgba(255, 255, 255, 0.08)";
-      pushBtn.style.color = "var(--text-color)";
-    }
+    // Make global handlers for HTML onclick dynamically
+    window.togglePin = togglePin;
+    window.togglePushAlerts = togglePushAlerts;
+    window.fetchSchedule = fetchSchedule;
 
-    pushBtn.addEventListener('click', async () => {
-      pushBtn.textContent = "Requesting Permission...";
-      const permission = await Notification.requestPermission();
-      
-      if (permission === 'granted') {
-        try {
-          const token = await getToken(messaging, {
-            vapidKey: "BEgs6yLKrhZ9Ayb_R4jRVkEmwplVWgM4vGwXojCDCoyw1fvb-qaADXv_j-Xi5KRX4_VQqRxlxLuXoD5g09vQWlg"
-          });
-          
-          if (token) {
-            fcmToken = token;
-            localStorage.setItem('fcmToken', token);
-            pushBtn.textContent = "Alerts Active";
-            pushBtn.style.background = "rgba(255, 255, 255, 0.08)";
-            pushBtn.style.color = "var(--text-color)";
-            showToast("Push notifications successfully activated!");
-            console.log("FCM Token:", token);
-          } else {
-            showToast("Failed to retrieve push token.");
+    function initFirebaseUI() {
+      const pushBtn = document.getElementById('global-push-btn');
+
+      if (fcmToken) {
+        pushBtn.textContent = "Alerts Active";
+        pushBtn.style.background = "rgba(255, 255, 255, 0.08)";
+        pushBtn.style.color = "var(--text-color)";
+      }
+
+      pushBtn.addEventListener('click', async () => {
+        pushBtn.textContent = "Requesting Permission...";
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+          try {
+            const token = await getToken(messaging, { vapidKey: VAPID_PUBLIC_KEY });
+            if (token) {
+              fcmToken = token;
+              localStorage.setItem('fcmToken', token);
+              pushBtn.textContent = "Alerts Active";
+              pushBtn.style.background = "rgba(255, 255, 255, 0.08)";
+              pushBtn.style.color = "var(--text-color)";
+              showToast('system', 'ALERT', 'Push notifications successfully activated!', '');
+            } else {
+              showToast('system', 'NOTICE', 'Failed to retrieve push token.', '');
+              pushBtn.textContent = "Enable Push Alerts";
+            }
+          } catch (err) {
+            console.error(err);
+            showToast('system', 'ERROR', 'Error retrieving push token. Check VAPID key.', '');
             pushBtn.textContent = "Enable Push Alerts";
           }
-        } catch (err) {
-          console.error(err);
-          showToast("Error retrieving push token. Check VAPID key.");
+        } else {
+          showToast('system', 'NOTICE', 'Notification permission denied.', '');
           pushBtn.textContent = "Enable Push Alerts";
         }
-      } else {
-        showToast("Notification permission denied.");
-        pushBtn.textContent = "Enable Push Alerts";
-      }
-    });
+      });
 
-    onMessage(messaging, (payload) => {
-      showToast(`Score Alert: ${payload.notification.title} - ${payload.notification.body}`);
-    });
+      onMessage(messaging, (payload) => {
+        showToast('fcm', 'PUSH ALERT', payload.notification.title, payload.notification.body);
+      });
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .catch(err => console.error('SW Registration Failed:', err));
+      }
+    }
 
     async function toggleNotificationSubscription(type, targetId, targetName) {
       if (!fcmToken) {
-        showToast("Click the 'Enable Push Alerts' button in the header first!");
+        showToast('system', 'NOTICE', "Click 'Enable Push Alerts' in the header first!", '');
         return;
       }
 
@@ -497,7 +662,7 @@
         if (isSubscribed) {
           await deleteDoc(docRef);
           subscribedTopics.delete(topicName);
-          showToast(`Alerts disabled for ${targetName}`);
+          showToast('system', 'SUBSCRIPTION', `Alerts disabled for ${targetName}`, '');
         } else {
           await setDoc(docRef, {
             token: fcmToken,
@@ -505,33 +670,140 @@
             createdAt: Date.now()
           });
           subscribedTopics.add(topicName);
-          showToast(`Enabled score alerts for ${targetName}`);
+          showToast('system', 'SUBSCRIPTION', `Enabled score alerts for ${targetName}`, '');
         }
         localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
         fetchScores(true);
       } catch (err) {
         console.error(err);
-        showToast("Could not save alert settings to Firestore. Ensure Firestore is enabled.");
+        showToast('system', 'ERROR', 'Could not save alert settings to Firestore.', '');
       }
     }
 
-    window.togglePin = togglePin;
-    window.fetchSummary = fetchSummary;
-    window.fetchSchedule = fetchSchedule;
-    window.toggleNotificationSubscription = toggleNotificationSubscription;
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
 
-    function showToast(message) {
+    function classifyBaseballPlay(text) {
+      if (!text) return { type: 'SCORING PLAY', detail: '' };
+      const upper = text.toUpperCase();
+
+      if (upper.includes('GRAND SLAM')) return { type: 'GRAND SLAM', detail: text };
+      if (upper.includes('HOME RUN') || upper.includes('HOMERUN')) return { type: 'HOME RUN', detail: text };
+      if (upper.includes('DOUBLE')) return { type: 'RBI DOUBLE', detail: text };
+      if (upper.includes('TRIPLE')) return { type: 'RBI TRIPLE', detail: text };
+      if (upper.includes('SINGLE')) return { type: 'RBI SINGLE', detail: text };
+      if (upper.includes('SACRIFICE FLY') || upper.includes('SAC FLY')) return { type: 'SAC FLY', detail: text };
+      if (upper.includes('WALK') || upper.includes('BASES LOADED')) return { type: 'WALK / RBI', detail: text };
+      if (upper.includes('WILD PITCH') || upper.includes('PASSED BALL')) return { type: 'RUN SCORED', detail: text };
+
+      return { type: 'SCORING PLAY', detail: text };
+    }
+
+    function showToast(eventId, eventType, scoreText, detailText, logoUrl = null) {
       const container = document.getElementById('toast-container');
+      
+      if (liveToastMap.has(eventId)) {
+        const existingToast = liveToastMap.get(eventId);
+        if (existingToast && container.contains(existingToast)) {
+          const typeEl = existingToast.querySelector('.toast-event-type');
+          const scoreEl = existingToast.querySelector('.toast-score');
+          const detailEl = existingToast.querySelector('.toast-detail');
+          const logoEl = existingToast.querySelector('.toast-logo');
+
+          if (typeEl) typeEl.textContent = eventType;
+          if (scoreEl) scoreEl.textContent = scoreText;
+          if (detailEl) detailEl.textContent = detailText;
+          if (logoEl && logoUrl) logoEl.src = logoUrl;
+
+          existingToast.style.transform = 'scale(1.03)';
+          setTimeout(() => existingToast.style.transform = 'scale(1)', 200);
+          return;
+        }
+      }
+
       const toast = document.createElement('div');
       toast.className = 'toast';
-      toast.textContent = message;
-      container.appendChild(toast);
 
-      setTimeout(() => {
+      const actionIconsSvg = `
+        <div class="toast-actions">
+          <button class="toast-btn toast-pin-btn" title="Pin alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              <path d="M13.5 2.25a.75.75 0 0 1 .75.75v3.136l2.162 2.162a.75.75 0 0 1 .222.53v2.872a.75.75 0 0 1-.75.75H13.5v7.5a.75.75 0 0 1-1.5 0v-7.5H8.116a.75.75 0 0 1-.75-.75V8.828a.75.75 0 0 1 .222-.53L9.75 6.136V3a.75.75 0 0 1 .75-.75h3z" />
+            </svg>
+          </button>
+          <button class="toast-btn toast-dismiss-btn" title="Dismiss notification">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      `;
+
+      let innerContent = '';
+      if (logoUrl) {
+        innerContent += `<img src="${logoUrl}" class="toast-logo" alt="Team Logo">`;
+      }
+      innerContent += `
+        <div class="toast-content">
+          <span class="toast-event-type">${eventType}</span>
+          <span class="toast-score">${scoreText}</span>
+          <span class="toast-detail">${detailText || ''}</span>
+        </div>
+        ${actionIconsSvg}
+      `;
+
+      toast.innerHTML = innerContent;
+      container.appendChild(toast);
+      liveToastMap.set(eventId, toast);
+
+      let isPinned = false;
+      let dismissTimeout = null;
+
+      const removeToast = () => {
         toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => toast.remove(), 500);
-      }, 4000);
+        setTimeout(() => {
+          toast.remove();
+          liveToastMap.delete(eventId);
+        }, 300);
+      };
+
+      const scheduleDismiss = () => {
+        dismissTimeout = setTimeout(() => {
+          if (!isPinned) removeToast();
+        }, 10000);
+      };
+
+      scheduleDismiss();
+
+      const pinBtn = toast.querySelector('.toast-pin-btn');
+      pinBtn.addEventListener('click', () => {
+        isPinned = !isPinned;
+        if (isPinned) {
+          toast.classList.add('pinned');
+          clearTimeout(dismissTimeout);
+        } else {
+          toast.classList.remove('pinned');
+          toast.style.animation = 'none';
+          toast.offsetHeight;
+          toast.style.animation = null;
+          scheduleDismiss();
+        }
+      });
+
+      const dismissBtn = toast.querySelector('.toast-dismiss-btn');
+      dismissBtn.addEventListener('click', () => {
+        clearTimeout(dismissTimeout);
+        removeToast();
+      });
     }
 
     function togglePin(eventId) {
@@ -541,6 +813,19 @@
         pinnedGames.add(eventId);
       }
       localStorage.setItem('pinnedGames', JSON.stringify([...pinnedGames]));
+      fetchScores(true);
+    }
+
+    async function togglePushAlerts(eventId, eventName = 'Game') {
+      await toggleNotificationSubscription('game', eventId, eventName);
+
+      const isEnabling = !pushGames.has(eventId);
+      if (isEnabling) {
+        pushGames.add(eventId);
+      } else {
+        pushGames.delete(eventId);
+      }
+      localStorage.setItem('pushGames', JSON.stringify([...pushGames]));
       fetchScores(true);
     }
 
@@ -556,22 +841,33 @@
       const timeStr = gameDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
       const diffMs = gameDate.getTime() - Date.now();
+      const totalMinutes = Math.floor(diffMs / (1000 * 60));
+
+      if (totalMinutes >= 0 && totalMinutes <= 5 && !startAlertedGames.has(event.id)) {
+        startAlertedGames.add(event.id);
+        
+        const comp = event.competitions[0];
+        const away = comp.competitors.find(c => c.homeAway === 'away') || comp.competitors[0];
+        const home = comp.competitors.find(c => c.homeAway === 'home') || comp.competitors[1];
+        const matchup = `${away.team.shortDisplayName || away.team.displayName} @ ${home.team.shortDisplayName || home.team.displayName}`;
+
+        showToast(
+          event.id,
+          'GAME START ALERT',
+          `Game starts in ${totalMinutes <= 1 ? '1 min' : totalMinutes + ' mins'}`,
+          matchup,
+          home.team.logo
+        );
+      }
       
       if (diffMs <= 0) {
         return `${dateStr} ${timeStr} • Starting Soon`;
       }
 
-      const totalMinutes = Math.floor(diffMs / (1000 * 60));
       const hours = Math.floor(totalMinutes / 60);
       const mins = totalMinutes % 60;
 
-      let countdownStr = '';
-      if (hours > 0) {
-        countdownStr = `in ${hours}h ${mins}m`;
-      } else {
-        countdownStr = `in ${mins}m`;
-      }
-
+      let countdownStr = hours > 0 ? `in ${hours}h ${mins}m` : `in ${mins}m`;
       return `${dateStr} ${timeStr} • ${countdownStr}`;
     }
 
@@ -586,6 +882,33 @@
           }
         }
       });
+    }
+
+    async function checkMLBScoringPlays(eventId, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeamLogo, inningText) {
+      try {
+        const summaryUrl = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${eventId}`;
+        const res = await fetch(summaryUrl);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const plays = data.plays || [];
+        const scoringPlays = plays.filter(p => p.scoringPlay === true || p.type?.text?.toLowerCase().includes('score'));
+
+        if (scoringPlays.length > 0) {
+          const lastScoringPlay = scoringPlays[scoringPlays.length - 1];
+          const playId = lastScoringPlay.id || lastScoringPlay.text;
+
+          if (!seenPlayIds.has(playId)) {
+            seenPlayIds.add(playId);
+            const classified = classifyBaseballPlay(lastScoringPlay.text);
+            const scoreText = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningText || 'Live'})`;
+
+            showToast(eventId, classified.type, scoreText, classified.detail, scoringTeamLogo);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching detailed MLB play text:', err);
+      }
     }
 
     async function fetchScores(isSilent = false) {
@@ -608,10 +931,9 @@
         const response = await fetch(url);
         if (!response.ok) throw new Error('Network response failed');
         const data = await response.json();
-        updateScoreboardDOM(data.events || []);
+        updateScoreboardDOM(data.events || [], isSilent);
 
         if (activeModalView) {
-          if (activeModalView.type === 'summary') fetchSummary(activeModalView.id, true);
           if (activeModalView.type === 'schedule') fetchSchedule(activeModalView.id, activeModalView.name, true);
         }
       } catch (err) {
@@ -627,7 +949,7 @@
       return totalRecord?.summary ? `(${totalRecord.summary})` : '';
     }
 
-    function updateScoreboardDOM(events) {
+    function updateScoreboardDOM(events, isSilent = false) {
       if (events.length === 0) {
         scoreboardEl.innerHTML = '<div class="loading">No games found for the selected criteria.</div>';
         return;
@@ -648,6 +970,7 @@
         const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
 
         const formattedStatus = formatGameStatus(event);
+        const inningStatusText = event.status?.type?.detail || '';
 
         const awayName = away.team.abbreviation || away.team.shortDisplayName || away.team.displayName;
         const homeName = home.team.abbreviation || home.team.shortDisplayName || home.team.displayName;
@@ -657,20 +980,54 @@
         const currentAwayScore = away.score ?? '-';
         const currentHomeScore = home.score ?? '-';
 
+        if (liveToastMap.has(event.id)) {
+          const activeToast = liveToastMap.get(event.id);
+          const scoreEl = activeToast.querySelector('.toast-score');
+          if (scoreEl) {
+            scoreEl.textContent = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
+          }
+        }
+
+        const isPostState = event.status?.type?.state === 'post';
+
+        if (isPostState && !finalAlertedGames.has(event.id)) {
+          finalAlertedGames.add(event.id);
+          localStorage.setItem('finalAlertedGames', JSON.stringify([...finalAlertedGames]));
+          
+          if (isSilent) {
+            const scoreText = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName}`;
+            const detailText = event.status?.type?.detail || 'Game Completed';
+            
+            let winningLogo = home.team.logo;
+            if (Number(currentAwayScore) > Number(currentHomeScore)) {
+              winningLogo = away.team.logo;
+            }
+
+            showToast(event.id, 'FINAL', scoreText, detailText, winningLogo);
+          }
+        }
+
         if (gameCache.has(event.id)) {
           const prev = gameCache.get(event.id);
-          if (prev.awayScore !== currentAwayScore || prev.homeScore !== currentHomeScore) {
-            const msg = `Score Update (${awayName} vs ${homeName}): ${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName}`;
-            showToast(msg);
+          const awayScored = prev.awayScore !== '-' && currentAwayScore !== '-' && Number(currentAwayScore) > Number(prev.awayScore);
+          const homeScored = prev.homeScore !== '-' && currentHomeScore !== '-' && Number(currentHomeScore) > Number(prev.homeScore);
+
+          if (awayScored || homeScored) {
+            const scoringTeam = awayScored ? away : home;
+            
+            if (currentSport === 'baseball') {
+              checkMLBScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, inningStatusText);
+            } else {
+              const scoreText = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
+              showToast(event.id, 'SCORE UPDATE', scoreText, `${scoringTeam.team.displayName} scored!`, scoringTeam.team.logo);
+            }
           }
         }
 
         gameCache.set(event.id, { awayScore: currentAwayScore, homeScore: currentHomeScore, event });
 
         const isPinned = pinnedGames.has(event.id);
-        const isGameAlerted = subscribedTopics.has(`game_${event.id}`);
-        const isAwayAlerted = subscribedTopics.has(`team_${away.team.id}`);
-        const isHomeAlerted = subscribedTopics.has(`team_${home.team.id}`);
+        const isPush = pushGames.has(event.id);
 
         let card = existingCards.get(event.id);
 
@@ -680,21 +1037,11 @@
           
           const pinBtn = card.querySelector('.pin-btn');
           pinBtn.className = `pin-btn ${isPinned ? 'active' : ''}`;
-          pinBtn.textContent = isPinned ? 'Pinned' : 'Pin';
+          pinBtn.textContent = isPinned ? '★' : '☆';
 
-          const alertBtn = card.querySelector('.alert-btn');
-          alertBtn.className = `alert-btn ${isGameAlerted ? 'active' : ''}`;
-          alertBtn.textContent = isGameAlerted ? 'Alerts On' : 'Alerts Off';
-
-          const teamAlertBtns = card.querySelectorAll('.team-alert-btn');
-          if (teamAlertBtns[0]) {
-            teamAlertBtns[0].className = `team-alert-btn ${isAwayAlerted ? 'active' : ''}`;
-            teamAlertBtns[0].textContent = isAwayAlerted ? 'Alerts On' : 'Alerts Off';
-          }
-          if (teamAlertBtns[1]) {
-            teamAlertBtns[1].className = `team-alert-btn ${isHomeAlerted ? 'active' : ''}`;
-            teamAlertBtns[1].textContent = isHomeAlerted ? 'Alerts On' : 'Alerts Off';
-          }
+          const pushBtn = card.querySelector('.btn-push');
+          pushBtn.className = `btn-push ${isPush ? 'active' : ''}`;
+          pushBtn.textContent = isPush ? 'Push On' : 'Push Off';
 
           const teamScores = card.querySelectorAll('.score');
           if (teamScores[0]) teamScores[0].textContent = currentAwayScore;
@@ -712,20 +1059,16 @@
           card.innerHTML = `
             <div class="card-header">
               <span class="status">${formattedStatus}</span>
-              <div class="header-actions">
-                <button class="alert-btn ${isGameAlerted ? 'active' : ''}" onclick="toggleNotificationSubscription('game', '${event.id}', '${awayName} vs ${homeName}')">${isGameAlerted ? 'Alerts On' : 'Alerts Off'}</button>
-                <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? 'Pinned' : 'Pin'}</button>
-              </div>
+              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? '★' : '☆'}</button>
             </div>
             
             <div class="team">
               <div class="team-info">
                 <img class="team-logo" src="${away.team.logo || 'https://via.placeholder.com/28'}" alt="${away.team.displayName}">
-                <span>
-                  ${away.team.displayName}
+                <div class="team-details">
+                  <span class="team-name">${away.team.displayName}</span>
                   <span class="team-record">${awayRecord}</span>
-                  <button class="team-alert-btn ${isAwayAlerted ? 'active' : ''}" onclick="toggleNotificationSubscription('team', '${away.team.id}', '${away.team.displayName}')">${isAwayAlerted ? 'Alerts On' : 'Alerts Off'}</button>
-                </span>
+                </div>
               </div>
               <span class="score">${currentAwayScore}</span>
             </div>
@@ -733,19 +1076,18 @@
             <div class="team">
               <div class="team-info">
                 <img class="team-logo" src="${home.team.logo || 'https://via.placeholder.com/28'}" alt="${home.team.displayName}">
-                <span>
-                  ${home.team.displayName}
+                <div class="team-details">
+                  <span class="team-name">${home.team.displayName}</span>
                   <span class="team-record">${homeRecord}</span>
-                  <button class="team-alert-btn ${isHomeAlerted ? 'active' : ''}" onclick="toggleNotificationSubscription('team', '${home.team.id}', '${home.team.displayName}')">${isHomeAlerted ? 'Alerts On' : 'Alerts Off'}</button>
-                </span>
+                </div>
               </div>
               <span class="score">${currentHomeScore}</span>
             </div>
 
             <div class="card-actions">
-              <button onclick="fetchSummary('${event.id}')">Summary</button>
               <button onclick="fetchSchedule('${away.team.id}', '${away.team.displayName}')">${awayName} Sched</button>
               <button onclick="fetchSchedule('${home.team.id}', '${home.team.displayName}')">${homeName} Sched</button>
+              <button class="btn-push ${isPush ? 'active' : ''}" onclick="togglePushAlerts('${event.id}', '${awayName} vs ${homeName}')">${isPush ? 'Push On' : 'Push Off'}</button>
             </div>
           `;
           scoreboardEl.appendChild(card);
@@ -753,34 +1095,6 @@
       });
 
       existingCards.forEach(card => card.remove());
-    }
-
-    async function fetchSummary(eventId, isSilent = false) {
-      if (!isSilent) openModal('Game Summary', 'Loading Game Summary...');
-      activeModalView = { type: 'summary', id: eventId };
-
-      const url = `https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/summary?event=${eventId}`;
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        
-        const header = data.header?.competitions?.[0] || {};
-        const boxscore = data.boxscore || {};
-
-        modalTitleEl.textContent = data.header?.season?.name || 'Game Summary';
-        modalBodyEl.innerHTML = `
-          <p><strong>Venue:</strong> ${header.venue?.fullName || 'N/A'}</p>
-          <h3>Teams & Leaders</h3>
-          ${(boxscore.teams || []).map(t => `
-            <div class="list-item">
-              <span><strong>${t.team?.displayName}</strong></span>
-              <span>${t.displayValue || ''}</span>
-            </div>
-          `).join('') || '<p>Detailed stats unavailable for this game.</p>'}
-        `;
-      } catch (err) {
-        if (!isSilent) modalBodyEl.innerHTML = `<p class="error">Failed to load game summary.</p>`;
-      }
     }
 
     async function fetchSchedule(teamId, teamName, isSilent = false) {
@@ -866,11 +1180,8 @@
       }, 10000);
     }
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .catch(err => console.error('SW Registration Failed:', err));
-    }
-
+    // Initialize App
+    initFirebaseUI();
     fetchScores(false);
     startAutoPolling();
   </script>
