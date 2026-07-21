@@ -485,10 +485,10 @@
       text-transform: uppercase;
     }
 
-    /* Toast System */
+    /* Toast System - Positioned Top Right */
     #toast-container {
       position: fixed;
-      bottom: 20px;
+      top: 20px;
       right: 20px;
       z-index: 1000;
       display: flex;
@@ -579,7 +579,7 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -1027,7 +1027,6 @@
         gameCache.set(event.id, { awayScore: currentAwayScore, homeScore: currentHomeScore, event });
 
         const isPinned = pinnedGames.has(event.id);
-        // Only consider push alerts active if FCM token exists AND game is registered in pushGames
         const isPush = Boolean(fcmToken && pushGames.has(event.id));
         let card = existingCards.get(event.id);
 
