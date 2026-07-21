@@ -401,45 +401,10 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { getFirestore, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    const db = getFirestore(app);
-
-async function toggleNotificationSubscription(type, targetId, targetName) {
-  if (!fcmToken) {
-    showToast("Click the 'Enable Push Alerts' button in the header first!");
-    return;
-  }
-
-  const topicName = `${type}_${targetId}`;
-  const isSubscribed = subscribedTopics.has(topicName);
-
-  try {
-    const docRef = doc(db, "subscriptions", `${fcmToken}_${topicName}`);
-    if (isSubscribed) {
-      await deleteDoc(docRef);
-      subscribedTopics.delete(topicName);
-      showToast(`Alerts disabled for ${targetName}`);
-    } else {
-      await setDoc(docRef, {
-        token: fcmToken,
-        topic: topicName,
-        createdAt: Date.now()
-      });
-      subscribedTopics.add(topicName);
-      showToast(`Enabled score alerts for ${targetName}!`);
-    }
-    localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
-    fetchScores(true);
-  } catch (err) {
-    console.error(err);
-    showToast("Could not save alert settings. Ensure Firestore is enabled in your console.");
-  }
-}
-
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+    import { getFirestore, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB_ExrYOQfmaYQqqS9lof8klY9Y8Qbrbc8",
@@ -454,6 +419,7 @@ async function toggleNotificationSubscription(type, targetId, targetName) {
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const messaging = getMessaging(app);
+    const db = getFirestore(app);
 
     let fcmToken = localStorage.getItem('fcmToken') || null;
     let subscribedTopics = new Set(JSON.parse(localStorage.getItem('subscribedTopics') || '[]'));
@@ -525,29 +491,27 @@ async function toggleNotificationSubscription(type, targetId, targetName) {
 
       const topicName = `${type}_${targetId}`;
       const isSubscribed = subscribedTopics.has(topicName);
-      const action = isSubscribed ? "unsubscribe" : "subscribe";
 
       try {
-        const response = await fetch("https://us-central1-webpush721.cloudfunctions.net/toggleAlert", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: fcmToken, topic: topicName, action: action })
-        });
-
-        if (!response.ok) throw new Error("Subscription failed");
-
+        const docRef = doc(db, "subscriptions", `${fcmToken}_${topicName}`);
         if (isSubscribed) {
+          await deleteDoc(docRef);
           subscribedTopics.delete(topicName);
           showToast(`Alerts disabled for ${targetName}`);
         } else {
+          await setDoc(docRef, {
+            token: fcmToken,
+            topic: topicName,
+            createdAt: Date.now()
+          });
           subscribedTopics.add(topicName);
-          showToast(`Enabled score alerts for ${targetName}!`);
+          showToast(`Enabled score alerts for ${targetName}`);
         }
         localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
         fetchScores(true);
       } catch (err) {
         console.error(err);
-        showToast("Could not save alert settings to subscription server");
+        showToast("Could not save alert settings to Firestore. Ensure Firestore is enabled.");
       }
     }
 
