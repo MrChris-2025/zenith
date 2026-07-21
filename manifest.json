@@ -1,0 +1,15 @@
+{
+  "name": "webpush721 App",
+  "short_name": "webpush721",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#039be5",
+  "icons": [
+    {
+      "src": "https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/2x/firebase_256dp.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}
