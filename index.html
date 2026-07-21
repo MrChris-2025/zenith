@@ -6,21 +6,22 @@
   <title>webpush721 Web App</title>
   <style>
     body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
-    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-    button { background: #039be5; color: white; border: none; padding: 12px 24px; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 450px; }
+    button { background: #039be5; color: white; border: none; padding: 12px 24px; border-radius: 4px; font-size: 1rem; cursor: pointer; margin: 10px 5px; transition: background 0.3s; }
     button:hover { background: #0288d1; }
     #status { margin-top: 15px; color: #555; font-size: 0.9rem; font-weight: bold; }
+    #tokenDisplay { word-break: break-all; font-size: 0.75rem; color: #777; margin-top: 15px; background: #eee; padding: 8px; border-radius: 4px; display: block; max-height: 80px; overflow-y: auto; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>webpush721 is Active!</h1>
-    <p>Your Firebase Web App is initialized and ready to collect telemetry.</p>
+    <p>Use the controls below to log custom analytics events and register for push notifications.</p>
     <button id="actionBtn">Track Interaction</button>
+    <button id="notiBtn" style="background-color: #ff9100;">Enable Push</button>
     <p id="status">Loading application...</p>
+    <div id="tokenDisplay">Your Push Token will appear here...</div>
   </div>
-
-<script type="module" src="./src/main.js"></script>
-
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
