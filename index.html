@@ -6,301 +6,391 @@
   <title>Sports Scoreboard & Schedules PWA</title>
   
   <link rel="apple-touch-icon" sizes="512x512" href="https://hcforever.nekoweb.org/mo2.png">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="/manifest.webmanifest">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0f172a, #1e1b4b, #0f172a);
-      --glass-bg: rgba(255, 255, 255, 0.07);
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-      --glass-blur: blur(12px);
+      --bg-dark: #0b0f19;
+      --bg-gradient: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%, #080c14 100%);
       
-      --text-color: #f8fafc;
+      --glass-surface: rgba(30, 41, 59, 0.45);
+      --glass-surface-hover: rgba(51, 65, 85, 0.55);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-bright: rgba(255, 255, 255, 0.18);
+      --glass-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --glass-blur: blur(16px);
+      
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --accent-color: #38bdf8;
-      --accent-hover: #0284c7;
-      --pinned-border: #f59e0b;
+      --accent-primary: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --pinned-accent: #f59e0b;
+      --pinned-glow: rgba(245, 158, 11, 0.2);
+      
+      --success-green: #22c55e;
+      --success-glow: rgba(34, 197, 94, 0.2);
 
-      /* Button Design System */
-      --btn-bg: rgba(255, 255, 255, 0.08);
-      --btn-border: rgba(255, 255, 255, 0.15);
-      --btn-radius: 12px;
-      --btn-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      
+      --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
       box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      background: var(--bg-gradient);
+      background: var(--bg-dark);
+      background-image: var(--bg-gradient);
       background-attachment: fixed;
-      color: var(--text-color);
-      margin: 0;
-      padding: 0;
+      color: var(--text-main);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Glassmorphism Header */
+    /* Header Architecture */
     header {
       width: 100%;
-      background: var(--glass-bg);
+      background: var(--glass-surface);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
-      padding: 1.2rem 0;
-      text-align: center;
       position: sticky;
       top: 0;
       z-index: 90;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0 0.75rem 0;
+      gap: 0.85rem;
+    }
+
+    .header-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1100px;
+      padding: 0 1.25rem;
     }
 
     h1 {
-      margin: 0 0 1rem 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
+    /* Navigation Bar */
     nav {
       display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      padding: 0 1rem;
-      margin-bottom: 1rem;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.4rem;
+      width: 100%;
+      max-width: 1100px;
+      padding: 0 1.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav button {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.825rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    nav button:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    nav button.active {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--accent-primary);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Filter Panel */
+    .controls-wrapper {
+      width: 100%;
+      max-width: 1100px;
+      padding: 0 1.25rem;
     }
 
     .controls {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--glass-border);
+      padding: 0.5rem;
+      border-radius: var(--radius-md);
     }
 
-    .controls input, .controls select {
-      background: var(--btn-bg);
-      color: var(--text-color);
-      border: 1px solid var(--btn-border);
-      padding: 0.5rem 1rem;
-      border-radius: var(--btn-radius);
-      font-size: 0.85rem;
-      backdrop-filter: blur(4px);
+    .controls input, .controls select, .controls button, #global-push-btn {
+      background: var(--glass-surface);
+      color: var(--text-main);
+      border: 1px solid var(--glass-border);
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 500;
       outline: none;
-      transition: var(--btn-transition);
+      transition: var(--transition-fast);
     }
 
     .controls input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
+      filter: invert(0.8);
+      cursor: pointer;
     }
 
-    /* Standard Base Button Styles */
+    .controls input:focus, .controls select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
     button {
-      background: var(--btn-bg);
-      color: var(--text-color);
-      border: 1px solid var(--btn-border);
-      padding: 0.5rem 1rem;
-      border-radius: var(--btn-radius);
-      font-size: 0.85rem;
-      font-weight: 500;
-      backdrop-filter: blur(4px);
-      outline: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
-      transition: var(--btn-transition);
+      gap: 0.35rem;
       user-select: none;
     }
 
     button:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
+      background: var(--glass-surface-hover);
+      border-color: var(--glass-border-bright);
     }
 
-    button:active {
-      transform: translateY(0);
+    #apply-filters {
+      background: var(--accent-primary);
+      color: var(--bg-dark);
+      border-color: var(--accent-primary);
+      font-weight: 600;
     }
 
-    button.active {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-      color: #0f172a;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    #apply-filters:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
     }
 
+    /* Main Dashboard Layout */
     main {
       width: 100%;
-      max-width: 950px;
-      padding: 1.5rem 1rem;
+      max-width: 1100px;
+      padding: 1.5rem 1.25rem;
+      flex: 1;
     }
 
     .scoreboard {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1.25rem;
     }
 
-    /* Glassmorphism Game Card */
+    /* Game Card */
     .game-card {
-      background: var(--glass-bg);
+      background: var(--glass-surface);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
-      border-radius: 16px;
-      padding: 1.2rem;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.15rem;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      gap: 0.85rem;
+      transition: var(--transition-fast);
       position: relative;
     }
 
-    .game-card.pinned {
-      border-color: var(--pinned-border);
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
-      order: -1;
+    .game-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--glass-border-bright);
     }
 
-    .game-card:hover {
-      transform: translateY(-4px);
+    .game-card.pinned {
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 0 20px var(--pinned-glow);
+      order: -1;
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.5rem;
     }
 
     .status {
-      font-size: 0.78rem;
-      color: var(--accent-color);
+      font-size: 0.725rem;
+      color: var(--accent-primary);
       text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    /* Icon-Only Buttons */
-    .pin-btn, .modal-close, .toast-btn {
-      background: transparent;
-      border: none;
-      padding: 4px;
-      border-radius: 6px;
-      color: var(--text-muted);
-      backdrop-filter: none;
-      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .pin-btn {
-      font-size: 1.2rem;
+      background: transparent;
+      border: none;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      line-height: 1;
     }
 
     .pin-btn:hover, .pin-btn.active {
-      color: var(--pinned-border);
-      background: rgba(245, 158, 11, 0.15);
-      box-shadow: none;
-      transform: none;
+      color: var(--pinned-accent);
+      background: rgba(245, 158, 11, 0.12);
     }
 
+    /* Teams & Scores */
     .team {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0.15rem 0;
     }
 
     .team-info {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.75rem;
+    }
+
+    .team-logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
     }
 
     .team-details {
       display: flex;
       flex-direction: column;
-      justify-content: center;
     }
 
     .team-name {
-      font-weight: 500;
-      line-height: 1.2;
-    }
-
-    .team-logo {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
+      font-weight: 600;
+      font-size: 0.925rem;
+      line-height: 1.25;
     }
 
     .team-record {
-      font-size: 0.75rem;
+      font-size: 0.725rem;
       color: var(--text-muted);
-      line-height: 1.2;
     }
 
     .score {
       font-weight: 700;
-      font-size: 1.2rem;
+      font-size: 1.35rem;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* Streamlined Card Action Button Layout */
+    /* Card Action Toolbar & Heroicons */
     .card-actions {
       display: flex;
-      gap: 0.5rem;
-      margin-top: 0.4rem;
+      align-items: center;
+      gap: 0.4rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .card-actions button {
-      font-size: 0.75rem;
-      padding: 0.4rem 0.6rem;
-      border-radius: 8px;
+      font-size: 0.725rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: var(--radius-sm);
       flex: 1;
       white-space: nowrap;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .card-actions button:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .btn-push {
-      background: rgba(34, 197, 94, 0.15);
-      border-color: rgba(34, 197, 94, 0.3);
-      color: #4ade80;
+      flex: 0 0 auto !important;
+      padding: 0.35rem 0.6rem !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
     }
 
-    .btn-push:hover {
-      background: rgba(34, 197, 94, 0.25);
-      border-color: rgba(34, 197, 94, 0.5);
+    .btn-push svg {
+      width: 18px;
+      height: 18px;
+      transition: var(--transition-fast);
+    }
+
+    .btn-push.inactive svg {
+      color: var(--text-muted);
+    }
+
+    .btn-push.inactive:hover {
+      border-color: var(--glass-border-bright);
+    }
+
+    .btn-push.inactive:hover svg {
+      color: var(--text-main);
     }
 
     .btn-push.active {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: #f87171;
+      background: rgba(34, 197, 94, 0.12) !important;
+      border-color: rgba(34, 197, 94, 0.3) !important;
+      box-shadow: 0 0 10px var(--success-glow);
     }
 
-    .btn-push.active:hover {
-      background: rgba(239, 68, 68, 0.25);
-      border-color: rgba(239, 68, 68, 0.5);
+    .btn-push.active svg {
+      color: var(--success-green);
     }
 
-    /* Glassmorphism Modal */
+    /* Modals & Overlay */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      inset: 0;
+      background: rgba(5, 8, 15, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       z-index: 100;
       justify-content: center;
       align-items: center;
@@ -312,26 +402,25 @@
     }
 
     .modal-content {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      border-radius: 20px;
+      background: #0f172a;
+      border: 1px solid var(--glass-border-bright);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 600px;
-      max-height: 85vh;
+      max-width: 550px;
+      max-height: 80vh;
       overflow-y: auto;
-      padding: 0 1.5rem 1.5rem 1.5rem;
+      padding: 1.5rem;
       position: relative;
+      scroll-behavior: smooth;
     }
 
     .modal-sticky-header {
       position: sticky;
-      top: 0;
-      background: rgba(15, 23, 42, 0.95);
-      padding: 1.2rem 0 1rem 0;
-      margin-bottom: 0.5rem;
+      top: -1.5rem;
+      background: #0f172a;
+      padding: 0 0 1rem 0;
+      margin-bottom: 1rem;
       border-bottom: 1px solid var(--glass-border);
       z-index: 10;
       display: flex;
@@ -340,159 +429,157 @@
     }
 
     .modal-sticky-header h2 {
-      margin: 0;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 600;
     }
 
     .modal-close {
-      font-size: 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      padding: 0 4px;
     }
 
     .modal-close:hover {
-      color: var(--text-color);
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: none;
-      transform: none;
+      color: var(--text-main);
     }
 
     .loading, .error {
       text-align: center;
       grid-column: 1 / -1;
-      padding: 2rem;
+      padding: 3rem 1rem;
       color: var(--text-muted);
+      font-size: 0.9rem;
     }
 
     .list-item {
-      padding: 0.6rem 0;
+      padding: 0.75rem 0;
       border-bottom: 1px solid var(--glass-border);
       display: flex;
       justify-content: space-between;
-      font-size: 0.88rem;
+      align-items: center;
+      font-size: 0.85rem;
     }
 
-    /* Glassmorphism Toast */
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item.upcoming-game {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.5rem;
+      margin: 0.25rem 0;
+    }
+
+    .upcoming-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: var(--accent-primary);
+      color: var(--bg-dark);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      text-transform: uppercase;
+    }
+
+    /* Toast System */
     #toast-container {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       right: 20px;
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      max-width: 380px;
+      gap: 8px;
+      max-width: 360px;
+      width: calc(100% - 40px);
     }
 
     .toast {
       position: relative;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
+      background: #0f172a;
       color: #fff;
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      border-left: 4px solid var(--accent-color);
-      box-shadow: var(--glass-shadow);
-      font-size: 0.85rem;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border-bright);
+      border-left: 4px solid var(--accent-primary);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      font-size: 0.825rem;
       display: flex;
       align-items: center;
       gap: 10px;
       overflow: hidden;
-      animation: fadeIn 0.3s ease;
-      transition: border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+      animation: fadeIn 0.25s ease;
     }
 
     .toast::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
+      inset: 0 auto 0 0;
       width: 100%;
-      background: rgba(56, 189, 248, 0.15);
+      background: var(--accent-glow);
       z-index: 0;
       animation: progressCountdown 10s linear forwards;
     }
 
     .toast.pinned::before {
       animation-play-state: paused;
-      background: rgba(245, 158, 11, 0.15);
-      width: 100% !important;
+      background: var(--pinned-glow);
     }
 
     .toast.pinned {
-      border-left-color: var(--pinned-border);
+      border-left-color: var(--pinned-accent);
     }
 
     .toast-logo {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       object-fit: contain;
-      flex-shrink: 0;
       z-index: 1;
     }
 
     .toast-content {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       flex-grow: 1;
       z-index: 1;
     }
 
     .toast-event-type {
-      font-size: 0.72rem;
+      font-size: 0.675rem;
       font-weight: 700;
-      color: var(--accent-color);
+      color: var(--accent-primary);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .toast.pinned .toast-event-type {
-      color: var(--pinned-border);
     }
 
     .toast-score {
       font-weight: 600;
-      font-size: 0.92rem;
+      font-size: 0.875rem;
     }
 
     .toast-detail {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
     .toast-actions {
       display: flex;
-      align-items: center;
-      gap: 4px;
+      gap: 2px;
       z-index: 1;
     }
 
-    .toast-btn:hover {
-      color: var(--text-color);
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: none;
-      transform: none;
-    }
-
-    .toast-pin-btn:hover, .toast.pinned .toast-pin-btn {
-      color: var(--pinned-border);
-    }
-
-    .toast-dismiss-btn:hover {
-      color: #f87171;
-    }
-
-    .toast-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
+    .toast-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -505,7 +592,10 @@
 <body>
 
   <header>
-    <h1>Sports Scoreboard & Schedules</h1>
+    <div class="header-title-row">
+      <h1>Sports Center</h1>
+      <button id="global-push-btn">Enable Alerts</button>
+    </div>
     
     <nav id="league-nav">
       <button data-sport="baseball" data-league="mlb" class="active">MLB</button>
@@ -515,16 +605,17 @@
       <button data-sport="soccer" data-league="eng.1">Premier League</button>
     </nav>
 
-    <div class="controls">
-      <input type="date" id="param-date">
-      <select id="param-seasontype">
-        <option value="">Season Type (All)</option>
-        <option value="1">Preseason (1)</option>
-        <option value="2">Regular Season (2)</option>
-        <option value="3">Postseason (3)</option>
-      </select>
-      <button id="apply-filters">Apply Filters</button>
-      <button id="global-push-btn">Enable Push Alerts</button>
+    <div class="controls-wrapper">
+      <div class="controls">
+        <input type="date" id="param-date">
+        <select id="param-seasontype">
+          <option value="">All Seasons</option>
+          <option value="1">Preseason</option>
+          <option value="2">Regular Season</option>
+          <option value="3">Postseason</option>
+        </select>
+        <button id="apply-filters">Apply Filters</button>
+      </div>
     </div>
   </header>
 
@@ -535,7 +626,7 @@
   </main>
 
   <div id="modal" class="modal-overlay">
-    <div class="modal-content">
+    <div class="modal-content" id="modal-scroll-container">
       <div class="modal-sticky-header">
         <h2 id="modal-title">Details</h2>
         <button class="modal-close" id="modal-close">&times;</button>
@@ -547,7 +638,6 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    // --- FIREBASE IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
@@ -571,7 +661,6 @@
     let fcmToken = localStorage.getItem('fcmToken') || null;
     let subscribedTopics = new Set(JSON.parse(localStorage.getItem('subscribedTopics') || '[]'));
 
-    // App state
     const VAPID_PUBLIC_KEY = 'BEgs6yLKrhZ9Ayb_R4jRVkEmwplVWgM4vGwXojCDCoyw1fvb-qaADXv_j-Xi5KRX4_VQqRxlxLuXoD5g09vQWlg';
 
     let currentSport = 'baseball';
@@ -579,7 +668,6 @@
     let pollInterval = null;
     let countdownInterval = null;
     let activeModalView = null;
-    let userPushSubscription = null;
     
     let gameCache = new Map();
     let liveToastMap = new Map();
@@ -589,13 +677,34 @@
     let pinnedGames = new Set(JSON.parse(localStorage.getItem('pinnedGames') || '[]'));
     let pushGames = new Set(JSON.parse(localStorage.getItem('pushGames') || '[]'));
 
+    // Heroicons SVG Strings
+    const BELL_ICON = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+      </svg>
+    `;
+
+    const CHECK_ICON = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l4.25-5.938Z" clip-rule="evenodd" />
+      </svg>
+    `;
+
     const scoreboardEl = document.getElementById('scoreboard');
     const navEl = document.getElementById('league-nav');
     const modalEl = document.getElementById('modal');
     const modalTitleEl = document.getElementById('modal-title');
     const modalBodyEl = document.getElementById('modal-body');
+    const dateInputEl = document.getElementById('param-date');
 
-    // Make global handlers for HTML onclick dynamically
+    function setDefaultDateFilter() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      dateInputEl.value = `${year}-${month}-${day}`;
+    }
+
     window.togglePin = togglePin;
     window.togglePushAlerts = togglePushAlerts;
     window.fetchSchedule = fetchSchedule;
@@ -605,12 +714,11 @@
 
       if (fcmToken) {
         pushBtn.textContent = "Alerts Active";
-        pushBtn.style.background = "rgba(255, 255, 255, 0.08)";
-        pushBtn.style.color = "var(--text-color)";
+        pushBtn.style.opacity = "0.7";
       }
 
       pushBtn.addEventListener('click', async () => {
-        pushBtn.textContent = "Requesting Permission...";
+        pushBtn.textContent = "Connecting...";
         const permission = await Notification.requestPermission();
         
         if (permission === 'granted') {
@@ -620,21 +728,21 @@
               fcmToken = token;
               localStorage.setItem('fcmToken', token);
               pushBtn.textContent = "Alerts Active";
-              pushBtn.style.background = "rgba(255, 255, 255, 0.08)";
-              pushBtn.style.color = "var(--text-color)";
-              showToast('system', 'ALERT', 'Push notifications successfully activated!', '');
+              pushBtn.style.opacity = "0.7";
+              showToast('system', 'ALERT', 'Push notifications active!', '');
+              fetchScores(true);
             } else {
-              showToast('system', 'NOTICE', 'Failed to retrieve push token.', '');
-              pushBtn.textContent = "Enable Push Alerts";
+              showToast('system', 'NOTICE', 'Token generation failed.', '');
+              pushBtn.textContent = "Enable Alerts";
             }
           } catch (err) {
             console.error(err);
-            showToast('system', 'ERROR', 'Error retrieving push token. Check VAPID key.', '');
-            pushBtn.textContent = "Enable Push Alerts";
+            showToast('system', 'ERROR', 'Notification setup failed.', '');
+            pushBtn.textContent = "Enable Alerts";
           }
         } else {
           showToast('system', 'NOTICE', 'Notification permission denied.', '');
-          pushBtn.textContent = "Enable Push Alerts";
+          pushBtn.textContent = "Enable Alerts";
         }
       });
 
@@ -643,15 +751,14 @@
       });
 
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-          .catch(err => console.error('SW Registration Failed:', err));
+        navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(console.error);
       }
     }
 
     async function toggleNotificationSubscription(type, targetId, targetName) {
       if (!fcmToken) {
-        showToast('system', 'NOTICE', "Click 'Enable Push Alerts' in the header first!", '');
-        return;
+        showToast('system', 'NOTICE', "Enable alerts in header first!", '');
+        return false;
       }
 
       const topicName = `${type}_${targetId}`;
@@ -662,33 +769,20 @@
         if (isSubscribed) {
           await deleteDoc(docRef);
           subscribedTopics.delete(topicName);
-          showToast('system', 'SUBSCRIPTION', `Alerts disabled for ${targetName}`, '');
+          showToast('system', 'SUBSCRIPTION', `Alerts disabled: ${targetName}`, '');
         } else {
-          await setDoc(docRef, {
-            token: fcmToken,
-            topic: topicName,
-            createdAt: Date.now()
-          });
+          await setDoc(docRef, { token: fcmToken, topic: topicName, createdAt: Date.now() });
           subscribedTopics.add(topicName);
-          showToast('system', 'SUBSCRIPTION', `Enabled score alerts for ${targetName}`, '');
+          showToast('system', 'SUBSCRIPTION', `Alerts enabled: ${targetName}`, '');
         }
         localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
         fetchScores(true);
+        return true;
       } catch (err) {
         console.error(err);
-        showToast('system', 'ERROR', 'Could not save alert settings to Firestore.', '');
+        showToast('system', 'ERROR', 'Failed to update subscriptions.', '');
+        return false;
       }
-    }
-
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
     }
 
     function classifyBaseballPlay(text) {
@@ -702,8 +796,7 @@
       if (upper.includes('SINGLE')) return { type: 'RBI SINGLE', detail: text };
       if (upper.includes('SACRIFICE FLY') || upper.includes('SAC FLY')) return { type: 'SAC FLY', detail: text };
       if (upper.includes('WALK') || upper.includes('BASES LOADED')) return { type: 'WALK / RBI', detail: text };
-      if (upper.includes('WILD PITCH') || upper.includes('PASSED BALL')) return { type: 'RUN SCORED', detail: text };
-
+      
       return { type: 'SCORING PLAY', detail: text };
     }
 
@@ -722,9 +815,6 @@
           if (scoreEl) scoreEl.textContent = scoreText;
           if (detailEl) detailEl.textContent = detailText;
           if (logoEl && logoUrl) logoEl.src = logoUrl;
-
-          existingToast.style.transform = 'scale(1.03)';
-          setTimeout(() => existingToast.style.transform = 'scale(1)', 200);
           return;
         }
       }
@@ -734,23 +824,14 @@
 
       const actionIconsSvg = `
         <div class="toast-actions">
-          <button class="toast-btn toast-pin-btn" title="Pin alert">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-              <path d="M13.5 2.25a.75.75 0 0 1 .75.75v3.136l2.162 2.162a.75.75 0 0 1 .222.53v2.872a.75.75 0 0 1-.75.75H13.5v7.5a.75.75 0 0 1-1.5 0v-7.5H8.116a.75.75 0 0 1-.75-.75V8.828a.75.75 0 0 1 .222-.53L9.75 6.136V3a.75.75 0 0 1 .75-.75h3z" />
-            </svg>
-          </button>
-          <button class="toast-btn toast-dismiss-btn" title="Dismiss notification">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06z" clip-rule="evenodd" />
-            </svg>
-          </button>
+          <button class="toast-btn toast-pin-btn" title="Pin Alert">📌</button>
+          <button class="toast-btn toast-dismiss-btn" title="Dismiss">&times;</button>
         </div>
       `;
 
       let innerContent = '';
       if (logoUrl) {
-        innerContent += `<img src="${logoUrl}" class="toast-logo" alt="Team Logo">`;
+        innerContent += `<img src="${logoUrl}" class="toast-logo" alt="Logo">`;
       }
       innerContent += `
         <div class="toast-content">
@@ -766,197 +847,142 @@
       liveToastMap.set(eventId, toast);
 
       let isPinned = false;
-      let dismissTimeout = null;
+      let dismissTimeout = setTimeout(() => { if (!isPinned) removeToast(); }, 10000);
 
-      const removeToast = () => {
+      function removeToast() {
         toast.style.opacity = '0';
-        setTimeout(() => {
-          toast.remove();
-          liveToastMap.delete(eventId);
-        }, 300);
-      };
+        setTimeout(() => { toast.remove(); liveToastMap.delete(eventId); }, 250);
+      }
 
-      const scheduleDismiss = () => {
-        dismissTimeout = setTimeout(() => {
-          if (!isPinned) removeToast();
-        }, 10000);
-      };
-
-      scheduleDismiss();
-
-      const pinBtn = toast.querySelector('.toast-pin-btn');
-      pinBtn.addEventListener('click', () => {
+      toast.querySelector('.toast-pin-btn').addEventListener('click', () => {
         isPinned = !isPinned;
-        if (isPinned) {
-          toast.classList.add('pinned');
-          clearTimeout(dismissTimeout);
-        } else {
-          toast.classList.remove('pinned');
-          toast.style.animation = 'none';
-          toast.offsetHeight;
-          toast.style.animation = null;
-          scheduleDismiss();
-        }
+        toast.classList.toggle('pinned', isPinned);
+        if (isPinned) clearTimeout(dismissTimeout);
       });
 
-      const dismissBtn = toast.querySelector('.toast-dismiss-btn');
-      dismissBtn.addEventListener('click', () => {
+      toast.querySelector('.toast-dismiss-btn').addEventListener('click', () => {
         clearTimeout(dismissTimeout);
         removeToast();
       });
     }
 
     function togglePin(eventId) {
-      if (pinnedGames.has(eventId)) {
-        pinnedGames.delete(eventId);
-      } else {
-        pinnedGames.add(eventId);
-      }
+      if (pinnedGames.has(eventId)) pinnedGames.delete(eventId);
+      else pinnedGames.add(eventId);
       localStorage.setItem('pinnedGames', JSON.stringify([...pinnedGames]));
       fetchScores(true);
     }
 
     async function togglePushAlerts(eventId, eventName = 'Game') {
-      await toggleNotificationSubscription('game', eventId, eventName);
-
-      const isEnabling = !pushGames.has(eventId);
-      if (isEnabling) {
-        pushGames.add(eventId);
-      } else {
-        pushGames.delete(eventId);
+      if (!fcmToken) {
+        showToast('system', 'NOTICE', 'Enable alerts in header first!', '');
+        return;
       }
-      localStorage.setItem('pushGames', JSON.stringify([...pushGames]));
-      fetchScores(true);
+
+      const success = await toggleNotificationSubscription('game', eventId, eventName);
+      if (success) {
+        if (pushGames.has(eventId)) pushGames.delete(eventId);
+        else pushGames.add(eventId);
+        localStorage.setItem('pushGames', JSON.stringify([...pushGames]));
+        fetchScores(true);
+      }
     }
 
     function formatGameStatus(event) {
       const state = event.status?.type?.state;
       const gameDate = new Date(event.date);
 
-      if (state !== 'pre') {
-        return event.status.type.detail;
-      }
+      if (state !== 'pre') return event.status.type.detail;
 
       const dateStr = `${gameDate.getMonth() + 1}/${gameDate.getDate()}`;
       const timeStr = gameDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-
-      const diffMs = gameDate.getTime() - Date.now();
-      const totalMinutes = Math.floor(diffMs / (1000 * 60));
+      const totalMinutes = Math.floor((gameDate.getTime() - Date.now()) / (1000 * 60));
 
       if (totalMinutes >= 0 && totalMinutes <= 5 && !startAlertedGames.has(event.id)) {
         startAlertedGames.add(event.id);
-        
         const comp = event.competitions[0];
         const away = comp.competitors.find(c => c.homeAway === 'away') || comp.competitors[0];
         const home = comp.competitors.find(c => c.homeAway === 'home') || comp.competitors[1];
-        const matchup = `${away.team.shortDisplayName || away.team.displayName} @ ${home.team.shortDisplayName || home.team.displayName}`;
-
-        showToast(
-          event.id,
-          'GAME START ALERT',
-          `Game starts in ${totalMinutes <= 1 ? '1 min' : totalMinutes + ' mins'}`,
-          matchup,
-          home.team.logo
-        );
-      }
-      
-      if (diffMs <= 0) {
-        return `${dateStr} ${timeStr} • Starting Soon`;
+        showToast(event.id, 'GAME START', `Starts in ${totalMinutes}m`, `${away.team.shortDisplayName} @ ${home.team.shortDisplayName}`, home.team.logo);
       }
 
+      if (totalMinutes <= 0) return `${dateStr} ${timeStr} • Starting Soon`;
       const hours = Math.floor(totalMinutes / 60);
       const mins = totalMinutes % 60;
-
-      let countdownStr = hours > 0 ? `in ${hours}h ${mins}m` : `in ${mins}m`;
-      return `${dateStr} ${timeStr} • ${countdownStr}`;
+      return `${dateStr} ${timeStr} • ${hours > 0 ? `${hours}h ${mins}m` : `${mins}m`}`;
     }
 
     function updateCountdowns() {
       document.querySelectorAll('.game-card').forEach(card => {
-        const eventId = card.getAttribute('data-event-id');
-        const cached = gameCache.get(eventId);
-        if (cached && cached.event) {
+        const cached = gameCache.get(card.getAttribute('data-event-id'));
+        if (cached?.event) {
           const statusEl = card.querySelector('.status');
-          if (statusEl) {
-            statusEl.textContent = formatGameStatus(cached.event);
-          }
+          if (statusEl) statusEl.textContent = formatGameStatus(cached.event);
         }
       });
     }
 
     async function checkMLBScoringPlays(eventId, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeamLogo, inningText) {
       try {
-        const summaryUrl = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${eventId}`;
-        const res = await fetch(summaryUrl);
+        const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${eventId}`);
         if (!res.ok) return;
         const data = await res.json();
-
-        const plays = data.plays || [];
-        const scoringPlays = plays.filter(p => p.scoringPlay === true || p.type?.text?.toLowerCase().includes('score'));
+        const scoringPlays = (data.plays || []).filter(p => p.scoringPlay || p.type?.text?.toLowerCase().includes('score'));
 
         if (scoringPlays.length > 0) {
-          const lastScoringPlay = scoringPlays[scoringPlays.length - 1];
-          const playId = lastScoringPlay.id || lastScoringPlay.text;
+          const lastPlay = scoringPlays[scoringPlays.length - 1];
+          const playId = lastPlay.id || lastPlay.text;
 
           if (!seenPlayIds.has(playId)) {
             seenPlayIds.add(playId);
-            const classified = classifyBaseballPlay(lastScoringPlay.text);
-            const scoreText = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningText || 'Live'})`;
-
-            showToast(eventId, classified.type, scoreText, classified.detail, scoringTeamLogo);
+            const classified = classifyBaseballPlay(lastPlay.text);
+            showToast(eventId, classified.type, `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningText || 'Live'})`, classified.detail, scoringTeamLogo);
           }
         }
       } catch (err) {
-        console.error('Error fetching detailed MLB play text:', err);
+        console.error('MLB Play Check Error:', err);
       }
     }
 
     async function fetchScores(isSilent = false) {
-      if (!isSilent) {
-        scoreboardEl.innerHTML = '<div class="loading">Loading scores...</div>';
-      }
+      if (!isSilent) scoreboardEl.innerHTML = '<div class="loading">Fetching live games...</div>';
       
-      const baseUrl = `https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/scoreboard`;
       const params = new URLSearchParams();
-
-      const dateVal = document.getElementById('param-date').value.replace(/-/g, '');
+      const dateVal = dateInputEl.value.replace(/-/g, '');
       const seasonTypeVal = document.getElementById('param-seasontype').value;
 
       if (dateVal) params.append('dates', dateVal);
       if (seasonTypeVal) params.append('seasontype', seasonTypeVal);
 
-      const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/scoreboard${params.toString() ? '?' + params.toString() : ''}`;
 
       try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response failed');
+        if (!response.ok) throw new Error('API Request Failed');
         const data = await response.json();
         updateScoreboardDOM(data.events || [], isSilent);
 
-        if (activeModalView) {
-          if (activeModalView.type === 'schedule') fetchSchedule(activeModalView.id, activeModalView.name, true);
+        if (activeModalView?.type === 'schedule') {
+          fetchSchedule(activeModalView.id, activeModalView.name, true);
         }
       } catch (err) {
-        if (!isSilent) {
-          scoreboardEl.innerHTML = `<div class="error">Unable to load scores. Check params or API availability.</div>`;
-        }
+        if (!isSilent) scoreboardEl.innerHTML = `<div class="error">Unable to fetch scores. Please try again.</div>`;
       }
     }
 
     function getTeamRecord(competitor) {
-      if (!competitor.records || competitor.records.length === 0) return '';
-      const totalRecord = competitor.records.find(r => r.type === 'total' || r.type === 'overall') || competitor.records[0];
-      return totalRecord?.summary ? `(${totalRecord.summary})` : '';
+      if (!competitor.records?.length) return '';
+      const rec = competitor.records.find(r => r.type === 'total' || r.type === 'overall') || competitor.records[0];
+      return rec?.summary ? `(${rec.summary})` : '';
     }
 
     function updateScoreboardDOM(events, isSilent = false) {
       if (events.length === 0) {
-        scoreboardEl.innerHTML = '<div class="loading">No games found for the selected criteria.</div>';
+        scoreboardEl.innerHTML = '<div class="loading">No games found for this selection.</div>';
         return;
       }
 
-      const staticMsg = scoreboardEl.querySelector('.loading, .error');
-      if (staticMsg) scoreboardEl.innerHTML = '';
+      if (scoreboardEl.querySelector('.loading, .error')) scoreboardEl.innerHTML = '';
 
       const existingCards = new Map();
       scoreboardEl.querySelectorAll('.game-card').forEach(card => {
@@ -964,46 +990,22 @@
       });
 
       events.forEach(event => {
-        const competition = event.competitions[0];
-        const competitors = competition.competitors;
-        const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
-        const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+        const comp = event.competitions[0];
+        const home = comp.competitors.find(c => c.homeAway === 'home') || comp.competitors[0];
+        const away = comp.competitors.find(c => c.homeAway === 'away') || comp.competitors[1];
 
         const formattedStatus = formatGameStatus(event);
-        const inningStatusText = event.status?.type?.detail || '';
-
-        const awayName = away.team.abbreviation || away.team.shortDisplayName || away.team.displayName;
-        const homeName = home.team.abbreviation || home.team.shortDisplayName || home.team.displayName;
-        const awayRecord = getTeamRecord(away);
-        const homeRecord = getTeamRecord(home);
-
+        const awayName = away.team.abbreviation || away.team.shortDisplayName;
+        const homeName = home.team.abbreviation || home.team.shortDisplayName;
         const currentAwayScore = away.score ?? '-';
         const currentHomeScore = home.score ?? '-';
 
-        if (liveToastMap.has(event.id)) {
-          const activeToast = liveToastMap.get(event.id);
-          const scoreEl = activeToast.querySelector('.toast-score');
-          if (scoreEl) {
-            scoreEl.textContent = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
-          }
-        }
-
-        const isPostState = event.status?.type?.state === 'post';
-
-        if (isPostState && !finalAlertedGames.has(event.id)) {
+        if (event.status?.type?.state === 'post' && !finalAlertedGames.has(event.id)) {
           finalAlertedGames.add(event.id);
           localStorage.setItem('finalAlertedGames', JSON.stringify([...finalAlertedGames]));
-          
           if (isSilent) {
-            const scoreText = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName}`;
-            const detailText = event.status?.type?.detail || 'Game Completed';
-            
-            let winningLogo = home.team.logo;
-            if (Number(currentAwayScore) > Number(currentHomeScore)) {
-              winningLogo = away.team.logo;
-            }
-
-            showToast(event.id, 'FINAL', scoreText, detailText, winningLogo);
+            const winnerLogo = Number(currentAwayScore) > Number(currentHomeScore) ? away.team.logo : home.team.logo;
+            showToast(event.id, 'FINAL', `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName}`, 'Game Finished', winnerLogo);
           }
         }
 
@@ -1014,12 +1016,10 @@
 
           if (awayScored || homeScored) {
             const scoringTeam = awayScored ? away : home;
-            
             if (currentSport === 'baseball') {
-              checkMLBScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, inningStatusText);
+              checkMLBScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, event.status?.type?.detail);
             } else {
-              const scoreText = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
-              showToast(event.id, 'SCORE UPDATE', scoreText, `${scoringTeam.team.displayName} scored!`, scoringTeam.team.logo);
+              showToast(event.id, 'SCORE UPDATE', `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName}`, `${scoringTeam.team.displayName} scored!`, scoringTeam.team.logo);
             }
           }
         }
@@ -1027,8 +1027,8 @@
         gameCache.set(event.id, { awayScore: currentAwayScore, homeScore: currentHomeScore, event });
 
         const isPinned = pinnedGames.has(event.id);
-        const isPush = pushGames.has(event.id);
-
+        // Only consider push alerts active if FCM token exists AND game is registered in pushGames
+        const isPush = Boolean(fcmToken && pushGames.has(event.id));
         let card = existingCards.get(event.id);
 
         if (card) {
@@ -1040,16 +1040,13 @@
           pinBtn.textContent = isPinned ? '★' : '☆';
 
           const pushBtn = card.querySelector('.btn-push');
-          pushBtn.className = `btn-push ${isPush ? 'active' : ''}`;
-          pushBtn.textContent = isPush ? 'Push On' : 'Push Off';
+          pushBtn.className = `btn-push ${isPush ? 'active' : 'inactive'}`;
+          pushBtn.title = isPush ? 'Disable push notifications' : (fcmToken ? 'Enable push notifications' : 'Enable alerts in header first');
+          pushBtn.innerHTML = isPush ? CHECK_ICON : BELL_ICON;
 
-          const teamScores = card.querySelectorAll('.score');
-          if (teamScores[0]) teamScores[0].textContent = currentAwayScore;
-          if (teamScores[1]) teamScores[1].textContent = currentHomeScore;
-
-          const teamRecords = card.querySelectorAll('.team-record');
-          if (teamRecords[0]) teamRecords[0].textContent = awayRecord;
-          if (teamRecords[1]) teamRecords[1].textContent = homeRecord;
+          const scores = card.querySelectorAll('.score');
+          if (scores[0]) scores[0].textContent = currentAwayScore;
+          if (scores[1]) scores[1].textContent = currentHomeScore;
 
           existingCards.delete(event.id);
         } else {
@@ -1064,10 +1061,10 @@
             
             <div class="team">
               <div class="team-info">
-                <img class="team-logo" src="${away.team.logo || 'https://via.placeholder.com/28'}" alt="${away.team.displayName}">
+                <img class="team-logo" src="${away.team.logo || ''}" alt="${away.team.displayName}">
                 <div class="team-details">
                   <span class="team-name">${away.team.displayName}</span>
-                  <span class="team-record">${awayRecord}</span>
+                  <span class="team-record">${getTeamRecord(away)}</span>
                 </div>
               </div>
               <span class="score">${currentAwayScore}</span>
@@ -1075,10 +1072,10 @@
 
             <div class="team">
               <div class="team-info">
-                <img class="team-logo" src="${home.team.logo || 'https://via.placeholder.com/28'}" alt="${home.team.displayName}">
+                <img class="team-logo" src="${home.team.logo || ''}" alt="${home.team.displayName}">
                 <div class="team-details">
                   <span class="team-name">${home.team.displayName}</span>
-                  <span class="team-record">${homeRecord}</span>
+                  <span class="team-record">${getTeamRecord(home)}</span>
                 </div>
               </div>
               <span class="score">${currentHomeScore}</span>
@@ -1087,7 +1084,9 @@
             <div class="card-actions">
               <button onclick="fetchSchedule('${away.team.id}', '${away.team.displayName}')">${awayName} Sched</button>
               <button onclick="fetchSchedule('${home.team.id}', '${home.team.displayName}')">${homeName} Sched</button>
-              <button class="btn-push ${isPush ? 'active' : ''}" onclick="togglePushAlerts('${event.id}', '${awayName} vs ${homeName}')">${isPush ? 'Push On' : 'Push Off'}</button>
+              <button class="btn-push ${isPush ? 'active' : 'inactive'}" title="${isPush ? 'Disable push notifications' : (fcmToken ? 'Enable push notifications' : 'Enable alerts in header first')}" onclick="togglePushAlerts('${event.id}', '${awayName} vs ${homeName}')">
+                ${isPush ? CHECK_ICON : BELL_ICON}
+              </button>
             </div>
           `;
           scoreboardEl.appendChild(card);
@@ -1098,48 +1097,62 @@
     }
 
     async function fetchSchedule(teamId, teamName, isSilent = false) {
-      if (!isSilent) openModal(`${teamName} Schedule`, `Loading Schedule for ${teamName}...`);
+      if (!isSilent) openModal(`${teamName} Schedule`, `Loading schedule...`);
       activeModalView = { type: 'schedule', id: teamId, name: teamName };
 
-      const url = `https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/teams/${teamId}/schedule`;
       try {
-        const res = await fetch(url);
+        const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/teams/${teamId}/schedule`);
         const data = await res.json();
         const events = data.events || [];
 
-        modalBodyEl.innerHTML = `
-          ${events.length === 0 ? '<p>No scheduled events found.</p>' : ''}
-          ${events.map(item => {
-            let dateStr = 'TBD';
-            if (item.date) {
-              const d = new Date(item.date);
-              dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
+        if (events.length === 0) {
+          modalBodyEl.innerHTML = '<p>No scheduled events found.</p>';
+          return;
+        }
+
+        const now = new Date();
+        let firstUpcomingIndex = events.findIndex(item => {
+          const state = item.status?.type?.state;
+          const itemDate = item.date ? new Date(item.date) : null;
+          return state === 'pre' || state === 'in' || (itemDate && itemDate >= now);
+        });
+
+        modalBodyEl.innerHTML = events.map((item, index) => {
+          const d = item.date ? new Date(item.date) : null;
+          const dateStr = d ? `${d.getMonth() + 1}/${d.getDate()}` : 'TBD';
+          
+          const comp = item.competitions?.[0];
+          let matchText = item.name;
+
+          if (comp?.competitors) {
+            const myTeam = comp.competitors.find(c => String(c.id) === String(teamId) || String(c.team?.id) === String(teamId));
+            const opp = comp.competitors.find(c => String(c.id) !== String(teamId) && String(c.team?.id) !== String(teamId));
+            if (opp?.team) {
+              const oppName = opp.team.shortDisplayName || opp.team.abbreviation;
+              matchText = (myTeam?.homeAway === 'home') ? `vs ${oppName}` : `@ ${oppName}`;
             }
-            
-            const comp = item.competitions?.[0];
-            let matchText = item.name;
+          }
 
-            if (comp && comp.competitors) {
-              const myTeam = comp.competitors.find(c => String(c.id) === String(teamId) || String(c.team?.id) === String(teamId));
-              const opponent = comp.competitors.find(c => String(c.id) !== String(teamId) && String(c.team?.id) !== String(teamId));
+          const isUpcoming = (index === firstUpcomingIndex);
+          const upcomingClass = isUpcoming ? 'upcoming-game' : '';
+          const upcomingTag = isUpcoming ? '<span class="upcoming-tag">Upcoming</span>' : '';
 
-              if (opponent && opponent.team) {
-                const oppName = opponent.team.displayName || opponent.team.shortDisplayName || opponent.team.abbreviation;
-                const isHome = myTeam ? myTeam.homeAway === 'home' : comp.competitors[0]?.id === myTeam?.id;
-                matchText = isHome ? `vs ${oppName}` : `@ ${oppName}`;
-              }
+          return `<div class="list-item ${upcomingClass}" ${isUpcoming ? 'id="upcoming-game-item"' : ''}>
+                    <span>${dateStr} ${upcomingTag}</span>
+                    <span>${matchText}</span>
+                  </div>`;
+        }).join('');
+
+        if (!isSilent) {
+          setTimeout(() => {
+            const upcomingEl = document.getElementById('upcoming-game-item');
+            if (upcomingEl) {
+              upcomingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-
-            return `
-              <div class="list-item">
-                <span>${dateStr}</span>
-                <span>${matchText}</span>
-              </div>
-            `;
-          }).join('')}
-        `;
+          }, 150);
+        }
       } catch (err) {
-        if (!isSilent) modalBodyEl.innerHTML = `<p class="error">Failed to load team schedule.</p>`;
+        if (!isSilent) modalBodyEl.innerHTML = `<p class="error">Failed to load schedule.</p>`;
       }
     }
 
@@ -1158,7 +1171,6 @@
       if (e.target.tagName === 'BUTTON') {
         document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
         e.target.classList.add('active');
-
         currentSport = e.target.getAttribute('data-sport');
         currentLeague = e.target.getAttribute('data-league');
         fetchScores(false);
@@ -1171,16 +1183,12 @@
       if (pollInterval) clearInterval(pollInterval);
       if (countdownInterval) clearInterval(countdownInterval);
 
-      pollInterval = setInterval(() => {
-        fetchScores(true);
-      }, 15000);
-
-      countdownInterval = setInterval(() => {
-        updateCountdowns();
-      }, 10000);
+      pollInterval = setInterval(() => fetchScores(true), 15000);
+      countdownInterval = setInterval(() => updateCountdowns(), 10000);
     }
 
-    // Initialize App
+    // App Initialization
+    setDefaultDateFilter();
     initFirebaseUI();
     fetchScores(false);
     startAutoPolling();
