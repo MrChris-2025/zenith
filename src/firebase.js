@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: "webpush721.firebasestorage.app",
   messagingSenderId: "638081013513",
   appId: "1:638081013513:web:88960958d7e8f12be325d8",
-  measurementId: "G-XXXXXXXXXX"
+  measurementId: "G-ZE56P5MBX6"
 };
 
 const app = initializeApp(firebaseConfig);
