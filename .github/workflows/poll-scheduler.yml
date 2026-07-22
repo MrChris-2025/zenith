@@ -1,0 +1,24 @@
+name: Check Scores and Send Notifications
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Runs every 5 minutes in the cloud
+  workflow_dispatch: # Allows you to manually trigger a score check inside your browser
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Execute Score Polling
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node poll-scores.js
