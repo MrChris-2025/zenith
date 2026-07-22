@@ -533,7 +533,7 @@
     }
 
     .toast.pinned {
-      border-left-color: var(--pinned-border);
+      border-left-color: var(--pinned-accent);
     }
 
     .toast-logo {
@@ -1014,6 +1014,12 @@
         const currentAwayScore = away.score ?? '-';
         const currentHomeScore = home.score ?? '-';
 
+        // Escape single quotes (apostrophes) to prevent breaking inline HTML onclick attributes
+        const safeAwayName = awayName.replace(/'/g, "\\'");
+        const safeHomeName = homeName.replace(/'/g, "\\'");
+        const safeAwayDisplayName = away.team.displayName.replace(/'/g, "\\'");
+        const safeHomeDisplayName = home.team.displayName.replace(/'/g, "\\'");
+
         if (event.status?.type?.state === 'post' && !finalAlertedGames.has(event.id)) {
           finalAlertedGames.add(event.id);
           localStorage.setItem('finalAlertedGames', JSON.stringify([...finalAlertedGames]));
@@ -1085,128 +1091,4 @@
 
             <div class="team">
               <div class="team-info">
-                <img class="team-logo" src="${home.team.logo || ''}" alt="${home.team.displayName}">
-                <div class="team-details">
-                  <span class="team-name">${home.team.displayName}</span>
-                  <span class="team-record">${getTeamRecord(home)}</span>
-                </div>
-              </div>
-              <span class="score">${currentHomeScore}</span>
-            </div>
-
-            <div class="card-actions">
-              <button onclick="fetchSchedule('${away.team.id}', '${away.team.displayName}')">${awayName} Sched</button>
-              <button onclick="fetchSchedule('${home.team.id}', '${home.team.displayName}')">${homeName} Sched</button>
-              <button class="btn-push ${isPush ? 'active' : 'inactive'}" title="${isPush ? 'Disable push notifications' : (fcmToken ? 'Enable push notifications' : 'Enable alerts in header first')}" onclick="togglePushAlerts('${event.id}', '${awayName} vs ${homeName}')">
-                ${isPush ? CHECK_ICON : BELL_ICON}
-              </button>
-            </div>
-          `;
-          scoreboardEl.appendChild(card);
-        }
-      });
-
-      existingCards.forEach(card => card.remove());
-    }
-
-    async function fetchSchedule(teamId, teamName, isSilent = false) {
-      if (!isSilent) openModal(`${teamName} Schedule`, `Loading schedule...`);
-      activeModalView = { type: 'schedule', id: teamId, name: teamName };
-
-      try {
-        const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/teams/${teamId}/schedule`);
-        const data = await res.json();
-        const events = data.events || [];
-
-        if (events.length === 0) {
-          modalBodyEl.innerHTML = '<p>No scheduled events found.</p>';
-          return;
-        }
-
-        const now = new Date();
-        let firstUpcomingIndex = events.findIndex(item => {
-          const state = item.status?.type?.state;
-          const itemDate = item.date ? new Date(item.date) : null;
-          return state === 'pre' || state === 'in' || (itemDate && itemDate >= now);
-        });
-
-        modalBodyEl.innerHTML = events.map((item, index) => {
-          const d = item.date ? new Date(item.date) : null;
-          const dateStr = d ? `${d.getMonth() + 1}/${d.getDate()}` : 'TBD';
-          
-          const comp = item.competitions?.[0];
-          let matchText = item.name;
-
-          if (comp?.competitors) {
-            const myTeam = comp.competitors.find(c => String(c.id) === String(teamId) || String(c.team?.id) === String(teamId));
-            const opp = comp.competitors.find(c => String(c.id) !== String(teamId) && String(c.team?.id) !== String(teamId));
-            if (opp?.team) {
-              const oppName = opp.team.shortDisplayName || opp.team.abbreviation;
-              matchText = (myTeam?.homeAway === 'home') ? `vs ${oppName}` : `@ ${oppName}`;
-            }
-          }
-
-          const isUpcoming = (index === firstUpcomingIndex);
-          const upcomingClass = isUpcoming ? 'upcoming-game' : '';
-          const upcomingTag = isUpcoming ? '<span class="upcoming-tag">Upcoming</span>' : '';
-
-          return `<div class="list-item ${upcomingClass}" ${isUpcoming ? 'id="upcoming-game-item"' : ''}>
-                    <span>${dateStr} ${upcomingTag}</span>
-                    <span>${matchText}</span>
-                  </div>`;
-        }).join('');
-
-        if (!isSilent) {
-          setTimeout(() => {
-            const upcomingEl = document.getElementById('upcoming-game-item');
-            if (upcomingEl) {
-              upcomingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          }, 150);
-        }
-      } catch (err) {
-        if (!isSilent) modalBodyEl.innerHTML = `<p class="error">Failed to load schedule.</p>`;
-      }
-    }
-
-    function openModal(title, initialText) {
-      modalTitleEl.textContent = title;
-      modalBodyEl.innerHTML = `<div class="loading">${initialText}</div>`;
-      modalEl.classList.add('active');
-    }
-
-    document.getElementById('modal-close').addEventListener('click', () => {
-      modalEl.classList.remove('active');
-      activeModalView = null;
-    });
-
-    navEl.addEventListener('click', (e) => {
-      if (e.target.tagName === 'BUTTON') {
-        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
-        currentSport = e.target.getAttribute('data-sport');
-        currentLeague = e.target.getAttribute('data-league');
-        fetchScores(false);
-      }
-    });
-
-    document.getElementById('apply-filters').addEventListener('click', () => fetchScores(false));
-
-    function startAutoPolling() {
-      if (pollInterval) clearInterval(pollInterval);
-      if (countdownInterval) clearInterval(countdownInterval);
-
-      pollInterval = setInterval(() => fetchScores(true), 15000);
-      countdownInterval = setInterval(() => updateCountdowns(), 10000);
-    }
-
-    // App Initialization
-    setDefaultDateFilter();
-    initFirebaseUI();
-    fetchScores(false);
-    startAutoPolling();
-  </script>
-</body>
-</html>
-</body>
-</html>
+                <img class="team-logo" src="${home.team.logo || ''}" alt="${home.team.displayNameNo response
