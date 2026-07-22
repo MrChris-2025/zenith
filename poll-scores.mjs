@@ -7,20 +7,7 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
   process.exit(1);
 }
 
-let secretStr = process.env.FIREBASE_SERVICE_ACCOUNT;
-
-// Defensive cleaning: strips away any curly smart quotes converted by iPadOS Safari
-secretStr = secretStr.replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"');
-secretStr = secretStr.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
-
-let serviceAccount;
-try {
-  serviceAccount = JSON.parse(secretStr);
-} catch (err) {
-  console.error("ERROR: Failed to parse FIREBASE_SERVICE_ACCOUNT JSON. Smart quotes or formatting errors detected.");
-  console.error(err.message);
-  process.exit(1);
-}
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 initializeApp({
   credential: cert(serviceAccount)
@@ -132,6 +119,7 @@ async function runContinuous() {
     for (const config of SPORTS_CONFIG) {
       await checkScoresForSport(config.sport, config.league);
     }
+    // Sleep for 15 seconds
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
   console.log('2-hour polling cycle complete. Exiting safely.');
