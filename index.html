@@ -88,8 +88,9 @@
     }
 
     h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
+      margin: 0 0 1rem 0;
+      font-size: 1.5rem;
+      font-weight: 600;
       letter-spacing: -0.02em;
       background: linear-gradient(to right, #ffffff, #94a3b8);
       -webkit-background-clip: text;
@@ -269,8 +270,9 @@
       padding: 2px 6px;
       border-radius: var(--radius-sm);
       color: var(--text-muted);
-      font-size: 1.1rem;
+      font-size: 0.85rem;
       line-height: 1;
+      font-weight: 600;
     }
 
     .pin-btn:hover, .pin-btn.active {
@@ -531,7 +533,7 @@
     }
 
     .toast.pinned {
-      border-left-color: var(--pinned-accent);
+      border-left-color: var(--pinned-border);
     }
 
     .toast-logo {
@@ -718,12 +720,19 @@
       }
 
       pushBtn.addEventListener('click', async () => {
+        // Safety check: Prevents fatal crashes in regular Safari tabs
+        if (typeof Notification === 'undefined') {
+          showToast('system', 'ERROR', 'Notifications are blocked in Safari. You must tap Share and select Add to Home Screen first!', '');
+          pushBtn.textContent = "Enable Alerts";
+          return;
+        }
+
         pushBtn.textContent = "Connecting...";
-        const permission = await Notification.requestPermission();
-        
-        if (permission === 'granted') {
-          try {
-            const token = await getToken(messaging, { vapidKey: VAPID_PUBLIC_KEY });
+        try {
+          const permission = await Notification.requestPermission();
+          
+          if (permission === 'granted') {
+            const token = await getToken(messaging, { securityKeys: VAPID_PUBLIC_KEY, vapidKey: VAPID_PUBLIC_KEY });
             if (token) {
               fcmToken = token;
               localStorage.setItem('fcmToken', token);
@@ -735,13 +744,13 @@
               showToast('system', 'NOTICE', 'Token generation failed.', '');
               pushBtn.textContent = "Enable Alerts";
             }
-          } catch (err) {
-            console.error(err);
-            showToast('system', 'ERROR', 'Notification setup failed.', '');
+          } else {
+            showToast('system', 'NOTICE', 'Notification permission denied.', '');
             pushBtn.textContent = "Enable Alerts";
           }
-        } else {
-          showToast('system', 'NOTICE', 'Notification permission denied.', '');
+        } catch (err) {
+          console.error(err);
+          showToast('system', 'ERROR', `Notification setup failed: ${err.message}`, '');
           pushBtn.textContent = "Enable Alerts";
         }
       });
@@ -755,38 +764,39 @@
       }
     }
 
-async function toggleNotificationSubscription(type, targetId, targetName) {
-  if (!fcmToken) {
-    showToast('system', 'NOTICE', "Click 'Enable Push Alerts' in the header first!", '');
-    return;
-  }
+    async function toggleNotificationSubscription(type, targetId, targetName) {
+      if (!fcmToken) {
+        showToast('system', 'NOTICE', "Click 'Enable Push Alerts' in the header first!", '');
+        return false;
+      }
 
-  const topicName = `${type}_${targetId}`;
-  const isSubscribed = subscribedTopics.has(topicName);
+      const topicName = `${type}_${targetId}`;
+      const isSubscribed = subscribedTopics.has(topicName);
 
-  try {
-    const docRef = doc(db, "subscriptions", `${fcmToken}_${topicName}`);
-    if (isSubscribed) {
-      await deleteDoc(docRef);
-      subscribedTopics.delete(topicName);
-      showToast('system', 'SUBSCRIPTION', `Alerts disabled for ${targetName}`, '');
-    } else {
-      await setDoc(docRef, {
-        token: fcmToken,
-        topic: topicName,
-        createdAt: Date.now()
-      });
-      subscribedTopics.add(topicName);
-      showToast('system', 'SUBSCRIPTION', `Enabled score alerts for ${targetName}`, '');
+      try {
+        const docRef = doc(db, "subscriptions", `${fcmToken}_${topicName}`);
+        if (isSubscribed) {
+          await deleteDoc(docRef);
+          subscribedTopics.delete(topicName);
+          showToast('system', 'SUBSCRIPTION', `Alerts disabled for ${targetName}`, '');
+        } else {
+          await setDoc(docRef, {
+            token: fcmToken,
+            topic: topicName,
+            createdAt: Date.now()
+          });
+          subscribedTopics.add(topicName);
+          showToast('system', 'SUBSCRIPTION', `Enabled score alerts for ${targetName}`, '');
+        }
+        localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
+        fetchScores(true);
+        return true;
+      } catch (err) {
+        console.error(err);
+        showToast('system', 'ERROR', `Database Error: ${err.message}`, '');
+        return false;
+      }
     }
-    localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
-    fetchScores(true);
-  } catch (err) {
-    console.error(err);
-    // This will display the exact system error on your iPad screen!
-    showToast('system', 'ERROR', `Database Error: ${err.message}`, '');
-  }
-}
 
 
     function classifyBaseballPlay(text) {
@@ -828,8 +838,8 @@ async function toggleNotificationSubscription(type, targetId, targetName) {
 
       const actionIconsSvg = `
         <div class="toast-actions">
-          <button class="toast-btn toast-pin-btn" title="Pin Alert">📌</button>
-          <button class="toast-btn toast-dismiss-btn" title="Dismiss">&times;</button>
+          <button class="toast-btn toast-pin-btn" title="Pin Alert">Pin</button>
+          <button class="toast-btn toast-dismiss-btn" title="Dismiss">Dismiss</button>
         </div>
       `;
 
@@ -1040,7 +1050,7 @@ async function toggleNotificationSubscription(type, targetId, targetName) {
           
           const pinBtn = card.querySelector('.pin-btn');
           pinBtn.className = `pin-btn ${isPinned ? 'active' : ''}`;
-          pinBtn.textContent = isPinned ? '★' : '☆';
+          pinBtn.textContent = isPinned ? 'Pinned' : 'Pin';
 
           const pushBtn = card.querySelector('.btn-push');
           pushBtn.className = `btn-push ${isPush ? 'active' : 'inactive'}`;
@@ -1059,7 +1069,7 @@ async function toggleNotificationSubscription(type, targetId, targetName) {
           card.innerHTML = `
             <div class="card-header">
               <span class="status">${formattedStatus}</span>
-              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? '★' : '☆'}</button>
+              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? 'Pinned' : 'Pin'}</button>
             </div>
             
             <div class="team">
@@ -1196,5 +1206,7 @@ async function toggleNotificationSubscription(type, targetId, targetName) {
     fetchScores(false);
     startAutoPolling();
   </script>
+</body>
+</html>
 </body>
 </html>
