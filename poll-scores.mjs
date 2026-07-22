@@ -2,7 +2,6 @@ import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 
-// Verify the environment variable is configured before executing
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
   console.error("ERROR: Missing FIREBASE_SERVICE_ACCOUNT secret in GitHub repository settings.");
   process.exit(1);
@@ -10,12 +9,10 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-// Initialize Firebase Admin using the official app sub-module
 initializeApp({
   credential: cert(serviceAccount)
 });
 
-// Access services directly through their sub-module constructors
 const db = getFirestore();
 const messaging = getMessaging();
 
@@ -48,7 +45,6 @@ async function checkScoresForSport(sport, league) {
       const awayName = away.team.shortDisplayName || away.team.displayName;
       const homeName = home.team.shortDisplayName || home.team.displayName;
 
-      // Access your Firestore collection directly using the sub-module reference
       const gameDocRef = db.collection('game_states').doc(event.id);
       const gameDoc = await gameDocRef.get();
 
@@ -73,7 +69,6 @@ async function checkScoresForSport(sport, league) {
         }
       }
 
-      // Record current scores for the next scheduling check
       await gameDocRef.set({
         awayScore: currentAwayScore,
         homeScore: currentHomeScore,
@@ -105,7 +100,6 @@ async function triggerNotifications(eventId, awayTeamId, homeTeamId, title, body
     const tokens = Array.from(tokensSet);
     if (tokens.length === 0) return;
 
-    // Dispatch notifications to target devices via multicast
     await messaging.sendEachForMulticast({
       tokens: tokens,
       notification: { title, body }
@@ -116,11 +110,19 @@ async function triggerNotifications(eventId, awayTeamId, homeTeamId, title, body
   }
 }
 
-async function run() {
-  console.log('Running scheduled sports score check...');
-  for (const config of SPORTS_CONFIG) {
-    await checkScoresForSport(config.sport, config.league);
+async function runContinuous() {
+  console.log('Continuous sports score check active. Polling every 15 seconds...');
+  const startTime = Date.now();
+  const twoHours = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+
+  while (Date.now() - startTime < twoHours) {
+    for (const config of SPORTS_CONFIG) {
+      await checkScoresForSport(config.sport, config.league);
+    }
+    // Sleep for 15 seconds
+    await new Promise(resolve => setTimeout(resolve, 15000));
   }
+  console.log('2-hour polling cycle complete. Exiting safely.');
 }
 
-run();
+runContinuous();
