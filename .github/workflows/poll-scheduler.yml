@@ -13,7 +13,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22 # Explicitly set to stable Node 22
 
       - name: Install Firebase Admin
         run: npm install firebase-admin
@@ -21,4 +21,4 @@ jobs:
       - name: Execute Score Polling
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: node poll-scores.js
+        run: node poll-scores.mjs # Targets the newly renamed .mjs file
