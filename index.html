@@ -88,9 +88,8 @@
     }
 
     h1 {
-      margin: 0 0 1rem 0;
-      font-size: 1.5rem;
-      font-weight: 600;
+      font-size: 1.25rem;
+      font-weight: 700;
       letter-spacing: -0.02em;
       background: linear-gradient(to right, #ffffff, #94a3b8);
       -webkit-background-clip: text;
@@ -270,9 +269,8 @@
       padding: 2px 6px;
       border-radius: var(--radius-sm);
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 1.1rem;
       line-height: 1;
-      font-weight: 600;
     }
 
     .pin-btn:hover, .pin-btn.active {
@@ -720,19 +718,12 @@
       }
 
       pushBtn.addEventListener('click', async () => {
-        // Safety check: Prevents fatal crashes in regular Safari tabs
-        if (typeof Notification === 'undefined') {
-          showToast('system', 'ERROR', 'Notifications are blocked in Safari. You must tap Share and select Add to Home Screen first!', '');
-          pushBtn.textContent = "Enable Alerts";
-          return;
-        }
-
         pushBtn.textContent = "Connecting...";
-        try {
-          const permission = await Notification.requestPermission();
-          
-          if (permission === 'granted') {
-            const token = await getToken(messaging, { securityKeys: VAPID_PUBLIC_KEY, vapidKey: VAPID_PUBLIC_KEY });
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+          try {
+            const token = await getToken(messaging, { vapidKey: VAPID_PUBLIC_KEY });
             if (token) {
               fcmToken = token;
               localStorage.setItem('fcmToken', token);
@@ -744,13 +735,13 @@
               showToast('system', 'NOTICE', 'Token generation failed.', '');
               pushBtn.textContent = "Enable Alerts";
             }
-          } else {
-            showToast('system', 'NOTICE', 'Notification permission denied.', '');
+          } catch (err) {
+            console.error(err);
+            showToast('system', 'ERROR', 'Notification setup failed.', '');
             pushBtn.textContent = "Enable Alerts";
           }
-        } catch (err) {
-          console.error(err);
-          showToast('system', 'ERROR', `Notification setup failed: ${err.message}`, '');
+        } else {
+          showToast('system', 'NOTICE', 'Notification permission denied.', '');
           pushBtn.textContent = "Enable Alerts";
         }
       });
@@ -766,7 +757,7 @@
 
     async function toggleNotificationSubscription(type, targetId, targetName) {
       if (!fcmToken) {
-        showToast('system', 'NOTICE', "Click 'Enable Push Alerts' in the header first!", '');
+        showToast('system', 'NOTICE', "Enable alerts in header first!", '');
         return false;
       }
 
@@ -778,26 +769,21 @@
         if (isSubscribed) {
           await deleteDoc(docRef);
           subscribedTopics.delete(topicName);
-          showToast('system', 'SUBSCRIPTION', `Alerts disabled for ${targetName}`, '');
+          showToast('system', 'SUBSCRIPTION', `Alerts disabled: ${targetName}`, '');
         } else {
-          await setDoc(docRef, {
-            token: fcmToken,
-            topic: topicName,
-            createdAt: Date.now()
-          });
+          await setDoc(docRef, { token: fcmToken, topic: topicName, createdAt: Date.now() });
           subscribedTopics.add(topicName);
-          showToast('system', 'SUBSCRIPTION', `Enabled score alerts for ${targetName}`, '');
+          showToast('system', 'SUBSCRIPTION', `Alerts enabled: ${targetName}`, '');
         }
         localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
         fetchScores(true);
         return true;
       } catch (err) {
         console.error(err);
-        showToast('system', 'ERROR', `Database Error: ${err.message}`, '');
+        showToast('system', 'ERROR', 'Failed to update subscriptions.', '');
         return false;
       }
     }
-
 
     function classifyBaseballPlay(text) {
       if (!text) return { type: 'SCORING PLAY', detail: '' };
@@ -838,8 +824,8 @@
 
       const actionIconsSvg = `
         <div class="toast-actions">
-          <button class="toast-btn toast-pin-btn" title="Pin Alert">Pin</button>
-          <button class="toast-btn toast-dismiss-btn" title="Dismiss">Dismiss</button>
+          <button class="toast-btn toast-pin-btn" title="Pin Alert">📌</button>
+          <button class="toast-btn toast-dismiss-btn" title="Dismiss">&times;</button>
         </div>
       `;
 
@@ -1014,12 +1000,6 @@
         const currentAwayScore = away.score ?? '-';
         const currentHomeScore = home.score ?? '-';
 
-        // Escape single quotes (apostrophes) to prevent breaking inline HTML onclick attributes
-        const safeAwayName = awayName.replace(/'/g, "\\'");
-        const safeHomeName = homeName.replace(/'/g, "\\'");
-        const safeAwayDisplayName = away.team.displayName.replace(/'/g, "\\'");
-        const safeHomeDisplayName = home.team.displayName.replace(/'/g, "\\'");
-
         if (event.status?.type?.state === 'post' && !finalAlertedGames.has(event.id)) {
           finalAlertedGames.add(event.id);
           localStorage.setItem('finalAlertedGames', JSON.stringify([...finalAlertedGames]));
@@ -1056,7 +1036,7 @@
           
           const pinBtn = card.querySelector('.pin-btn');
           pinBtn.className = `pin-btn ${isPinned ? 'active' : ''}`;
-          pinBtn.textContent = isPinned ? 'Pinned' : 'Pin';
+          pinBtn.textContent = isPinned ? '★' : '☆';
 
           const pushBtn = card.querySelector('.btn-push');
           pushBtn.className = `btn-push ${isPush ? 'active' : 'inactive'}`;
@@ -1075,7 +1055,7 @@
           card.innerHTML = `
             <div class="card-header">
               <span class="status">${formattedStatus}</span>
-              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? 'Pinned' : 'Pin'}</button>
+              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? '★' : '☆'}</button>
             </div>
             
             <div class="team">
@@ -1091,4 +1071,126 @@
 
             <div class="team">
               <div class="team-info">
-                <img class="team-logo" src="${home.team.logo || ''}" alt="${home.team.displayNameNo response
+                <img class="team-logo" src="${home.team.logo || ''}" alt="${home.team.displayName}">
+                <div class="team-details">
+                  <span class="team-name">${home.team.displayName}</span>
+                  <span class="team-record">${getTeamRecord(home)}</span>
+                </div>
+              </div>
+              <span class="score">${currentHomeScore}</span>
+            </div>
+
+            <div class="card-actions">
+              <button onclick="fetchSchedule('${away.team.id}', '${away.team.displayName}')">${awayName} Sched</button>
+              <button onclick="fetchSchedule('${home.team.id}', '${home.team.displayName}')">${homeName} Sched</button>
+              <button class="btn-push ${isPush ? 'active' : 'inactive'}" title="${isPush ? 'Disable push notifications' : (fcmToken ? 'Enable push notifications' : 'Enable alerts in header first')}" onclick="togglePushAlerts('${event.id}', '${awayName} vs ${homeName}')">
+                ${isPush ? CHECK_ICON : BELL_ICON}
+              </button>
+            </div>
+          `;
+          scoreboardEl.appendChild(card);
+        }
+      });
+
+      existingCards.forEach(card => card.remove());
+    }
+
+    async function fetchSchedule(teamId, teamName, isSilent = false) {
+      if (!isSilent) openModal(`${teamName} Schedule`, `Loading schedule...`);
+      activeModalView = { type: 'schedule', id: teamId, name: teamName };
+
+      try {
+        const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/teams/${teamId}/schedule`);
+        const data = await res.json();
+        const events = data.events || [];
+
+        if (events.length === 0) {
+          modalBodyEl.innerHTML = '<p>No scheduled events found.</p>';
+          return;
+        }
+
+        const now = new Date();
+        let firstUpcomingIndex = events.findIndex(item => {
+          const state = item.status?.type?.state;
+          const itemDate = item.date ? new Date(item.date) : null;
+          return state === 'pre' || state === 'in' || (itemDate && itemDate >= now);
+        });
+
+        modalBodyEl.innerHTML = events.map((item, index) => {
+          const d = item.date ? new Date(item.date) : null;
+          const dateStr = d ? `${d.getMonth() + 1}/${d.getDate()}` : 'TBD';
+          
+          const comp = item.competitions?.[0];
+          let matchText = item.name;
+
+          if (comp?.competitors) {
+            const myTeam = comp.competitors.find(c => String(c.id) === String(teamId) || String(c.team?.id) === String(teamId));
+            const opp = comp.competitors.find(c => String(c.id) !== String(teamId) && String(c.team?.id) !== String(teamId));
+            if (opp?.team) {
+              const oppName = opp.team.shortDisplayName || opp.team.abbreviation;
+              matchText = (myTeam?.homeAway === 'home') ? `vs ${oppName}` : `@ ${oppName}`;
+            }
+          }
+
+          const isUpcoming = (index === firstUpcomingIndex);
+          const upcomingClass = isUpcoming ? 'upcoming-game' : '';
+          const upcomingTag = isUpcoming ? '<span class="upcoming-tag">Upcoming</span>' : '';
+
+          return `<div class="list-item ${upcomingClass}" ${isUpcoming ? 'id="upcoming-game-item"' : ''}>
+                    <span>${dateStr} ${upcomingTag}</span>
+                    <span>${matchText}</span>
+                  </div>`;
+        }).join('');
+
+        if (!isSilent) {
+          setTimeout(() => {
+            const upcomingEl = document.getElementById('upcoming-game-item');
+            if (upcomingEl) {
+              upcomingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 150);
+        }
+      } catch (err) {
+        if (!isSilent) modalBodyEl.innerHTML = `<p class="error">Failed to load schedule.</p>`;
+      }
+    }
+
+    function openModal(title, initialText) {
+      modalTitleEl.textContent = title;
+      modalBodyEl.innerHTML = `<div class="loading">${initialText}</div>`;
+      modalEl.classList.add('active');
+    }
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      modalEl.classList.remove('active');
+      activeModalView = null;
+    });
+
+    navEl.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentSport = e.target.getAttribute('data-sport');
+        currentLeague = e.target.getAttribute('data-league');
+        fetchScores(false);
+      }
+    });
+
+    document.getElementById('apply-filters').addEventListener('click', () => fetchScores(false));
+
+    function startAutoPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      pollInterval = setInterval(() => fetchScores(true), 15000);
+      countdownInterval = setInterval(() => updateCountdowns(), 10000);
+    }
+
+    // App Initialization
+    setDefaultDateFilter();
+    initFirebaseUI();
+    fetchScores(false);
+    startAutoPolling();
+  </script>
+</body>
+</html>
