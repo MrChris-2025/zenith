@@ -755,35 +755,39 @@
       }
     }
 
-    async function toggleNotificationSubscription(type, targetId, targetName) {
-      if (!fcmToken) {
-        showToast('system', 'NOTICE', "Enable alerts in header first!", '');
-        return false;
-      }
+async function toggleNotificationSubscription(type, targetId, targetName) {
+  if (!fcmToken) {
+    showToast('system', 'NOTICE', "Click 'Enable Push Alerts' in the header first!", '');
+    return;
+  }
 
-      const topicName = `${type}_${targetId}`;
-      const isSubscribed = subscribedTopics.has(topicName);
+  const topicName = `${type}_${targetId}`;
+  const isSubscribed = subscribedTopics.has(topicName);
 
-      try {
-        const docRef = doc(db, "subscriptions", `${fcmToken}_${topicName}`);
-        if (isSubscribed) {
-          await deleteDoc(docRef);
-          subscribedTopics.delete(topicName);
-          showToast('system', 'SUBSCRIPTION', `Alerts disabled: ${targetName}`, '');
-        } else {
-          await setDoc(docRef, { token: fcmToken, topic: topicName, createdAt: Date.now() });
-          subscribedTopics.add(topicName);
-          showToast('system', 'SUBSCRIPTION', `Alerts enabled: ${targetName}`, '');
-        }
-        localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
-        fetchScores(true);
-        return true;
-      } catch (err) {
-        console.error(err);
-        showToast('system', 'ERROR', 'Failed to update subscriptions.', '');
-        return false;
-      }
+  try {
+    const docRef = doc(db, "subscriptions", `${fcmToken}_${topicName}`);
+    if (isSubscribed) {
+      await deleteDoc(docRef);
+      subscribedTopics.delete(topicName);
+      showToast('system', 'SUBSCRIPTION', `Alerts disabled for ${targetName}`, '');
+    } else {
+      await setDoc(docRef, {
+        token: fcmToken,
+        topic: topicName,
+        createdAt: Date.now()
+      });
+      subscribedTopics.add(topicName);
+      showToast('system', 'SUBSCRIPTION', `Enabled score alerts for ${targetName}`, '');
     }
+    localStorage.setItem('subscribedTopics', JSON.stringify([...subscribedTopics]));
+    fetchScores(true);
+  } catch (err) {
+    console.error(err);
+    // This will display the exact system error on your iPad screen!
+    showToast('system', 'ERROR', `Database Error: ${err.message}`, '');
+  }
+}
+
 
     function classifyBaseballPlay(text) {
       if (!text) return { type: 'SCORING PLAY', detail: '' };
