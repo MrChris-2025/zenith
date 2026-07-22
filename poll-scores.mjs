@@ -1,6 +1,8 @@
-import admin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 
-// Check if your GitHub Secret is configured and accessible
+// Verify the environment variable is configured before executing
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
   console.error("ERROR: Missing FIREBASE_SERVICE_ACCOUNT secret in GitHub repository settings.");
   process.exit(1);
@@ -8,12 +10,14 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+// Initialize Firebase Admin using the official app sub-module
+initializeApp({
+  credential: cert(serviceAccount)
 });
 
-const db = admin.firestore();
-const messaging = admin.messaging();
+// Access services directly through their sub-module constructors
+const db = getFirestore();
+const messaging = getMessaging();
 
 const SPORTS_CONFIG = [
   { sport: 'baseball', league: 'mlb' },
@@ -44,7 +48,7 @@ async function checkScoresForSport(sport, league) {
       const awayName = away.team.shortDisplayName || away.team.displayName;
       const homeName = home.team.shortDisplayName || home.team.displayName;
 
-      // Read the last known score from Firestore
+      // Access your Firestore collection directly using the sub-module reference
       const gameDocRef = db.collection('game_states').doc(event.id);
       const gameDoc = await gameDocRef.get();
 
@@ -69,7 +73,7 @@ async function checkScoresForSport(sport, league) {
         }
       }
 
-      // Update Firestore with the current score for the next check
+      // Record current scores for the next scheduling check
       await gameDocRef.set({
         awayScore: currentAwayScore,
         homeScore: currentHomeScore,
@@ -101,6 +105,7 @@ async function triggerNotifications(eventId, awayTeamId, homeTeamId, title, body
     const tokens = Array.from(tokensSet);
     if (tokens.length === 0) return;
 
+    // Dispatch notifications to target devices via multicast
     await messaging.sendEachForMulticast({
       tokens: tokens,
       notification: { title, body }
