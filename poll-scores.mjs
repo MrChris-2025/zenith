@@ -27,7 +27,7 @@ const SPORTS_CONFIG = [
 async function checkScoresForSport(sport, league) {
   const url = `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard`;
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: AbortSignal.timeout(10000) }); // 10s timeout
     if (!response.ok) return;
     const data = await response.json();
     const events = data.events || [];
@@ -110,19 +110,18 @@ async function triggerNotifications(eventId, awayTeamId, homeTeamId, title, body
   }
 }
 
-async function runContinuous() {
-  console.log('Continuous sports score check active. Polling every 15 seconds...');
-  const startTime = Date.now();
-  const twoHours = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
-
-  while (Date.now() - startTime < twoHours) {
-    for (const config of SPORTS_CONFIG) {
-      await checkScoresForSport(config.sport, config.league);
-    }
-    // Sleep for 15 seconds
-    await new Promise(resolve => setTimeout(resolve, 15000));
+async function runOnce() {
+  console.log('Running sports score check...');
+  
+  for (const config of SPORTS_CONFIG) {
+    await checkScoresForSport(config.sport, config.league);
   }
-  console.log('2-hour polling cycle complete. Exiting safely.');
+  
+  console.log('Score check complete. Exiting safely.');
+  process.exit(0);
 }
 
-runContinuous();
+runOnce().catch(err => {
+  console.error('Fatal error during execution:', err);
+  process.exit(1);
+});
