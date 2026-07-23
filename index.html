@@ -269,8 +269,9 @@
       padding: 2px 6px;
       border-radius: var(--radius-sm);
       color: var(--text-muted);
-      font-size: 1.1rem;
+      font-size: 0.85rem;
       line-height: 1;
+      font-weight: 600;
     }
 
     .pin-btn:hover, .pin-btn.active {
@@ -718,11 +719,17 @@
       }
 
       pushBtn.addEventListener('click', async () => {
+        if (typeof Notification === 'undefined') {
+          showToast('system', 'ERROR', 'Notifications are blocked in Safari. You must tap Share and select Add to Home Screen first!', '');
+          pushBtn.textContent = "Enable Alerts";
+          return;
+        }
+
         pushBtn.textContent = "Connecting...";
-        const permission = await Notification.requestPermission();
-        
-        if (permission === 'granted') {
-          try {
+        try {
+          const permission = await Notification.requestPermission();
+          
+          if (permission === 'granted') {
             const token = await getToken(messaging, { vapidKey: VAPID_PUBLIC_KEY });
             if (token) {
               fcmToken = token;
@@ -735,13 +742,13 @@
               showToast('system', 'NOTICE', 'Token generation failed.', '');
               pushBtn.textContent = "Enable Alerts";
             }
-          } catch (err) {
-            console.error(err);
-            showToast('system', 'ERROR', 'Notification setup failed.', '');
+          } else {
+            showToast('system', 'NOTICE', 'Notification permission denied.', '');
             pushBtn.textContent = "Enable Alerts";
           }
-        } else {
-          showToast('system', 'NOTICE', 'Notification permission denied.', '');
+        } catch (err) {
+          console.error(err);
+          showToast('system', 'ERROR', `Notification setup failed: ${err.message}`, '');
           pushBtn.textContent = "Enable Alerts";
         }
       });
@@ -780,7 +787,7 @@
         return true;
       } catch (err) {
         console.error(err);
-        showToast('system', 'ERROR', 'Failed to update subscriptions.', '');
+        showToast('system', 'ERROR', `Database Error: ${err.message}`, '');
         return false;
       }
     }
@@ -798,6 +805,27 @@
       if (upper.includes('WALK') || upper.includes('BASES LOADED')) return { type: 'WALK / RBI', detail: text };
       
       return { type: 'SCORING PLAY', detail: text };
+    }
+
+    async function checkNFLScoringPlays(eventId, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeamLogo, statusText) {
+      try {
+        const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${eventId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const scoringPlays = (data.plays || []).filter(p => p.scoringPlay || p.type?.text?.toLowerCase().includes('score'));
+
+        if (scoringPlays.length > 0) {
+          const lastPlay = scoringPlays[scoringPlays.length - 1];
+          const playId = lastPlay.id || lastPlay.text;
+
+          if (!seenPlayIds.has(playId)) {
+            seenPlayIds.add(playId);
+            showToast(eventId, 'TOUCHDOWN / FIELD GOAL', `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${statusText || 'Live'})`, lastPlay.text, scoringTeamLogo);
+          }
+        }
+      } catch (err) {
+        console.error('NFL Play Check Error:', err);
+      }
     }
 
     function showToast(eventId, eventType, scoreText, detailText, logoUrl = null) {
@@ -824,8 +852,8 @@
 
       const actionIconsSvg = `
         <div class="toast-actions">
-          <button class="toast-btn toast-pin-btn" title="Pin Alert">📌</button>
-          <button class="toast-btn toast-dismiss-btn" title="Dismiss">&times;</button>
+          <button class="toast-btn toast-pin-btn" title="Pin Alert">Pin</button>
+          <button class="toast-btn toast-dismiss-btn" title="Dismiss">Dismiss</button>
         </div>
       `;
 
@@ -1018,8 +1046,10 @@
             const scoringTeam = awayScored ? away : home;
             if (currentSport === 'baseball') {
               checkMLBScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, event.status?.type?.detail);
+            } else if (currentSport === 'football') {
+              checkNFLScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, event.status?.type?.detail);
             } else {
-              showToast(event.id, 'SCORE UPDATE', `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName}`, `${scoringTeam.team.displayName} scored!`, scoringTeam.team.logo);
+              showToast(event.id, 'SCORE UPDATE', `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`, `${scoringTeam.team.displayName} scored!`, scoringTeam.team.logo);
             }
           }
         }
@@ -1036,7 +1066,7 @@
           
           const pinBtn = card.querySelector('.pin-btn');
           pinBtn.className = `pin-btn ${isPinned ? 'active' : ''}`;
-          pinBtn.textContent = isPinned ? '★' : '☆';
+          pinBtn.textContent = isPinned ? 'Pinned' : 'Pin';
 
           const pushBtn = card.querySelector('.btn-push');
           pushBtn.className = `btn-push ${isPush ? 'active' : 'inactive'}`;
@@ -1055,7 +1085,7 @@
           card.innerHTML = `
             <div class="card-header">
               <span class="status">${formattedStatus}</span>
-              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? '★' : '☆'}</button>
+              <button class="pin-btn ${isPinned ? 'active' : ''}" onclick="togglePin('${event.id}')">${isPinned ? 'Pinned' : 'Pin'}</button>
             </div>
             
             <div class="team">
