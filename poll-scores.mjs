@@ -62,7 +62,7 @@ async function checkScoresForSport(sport, league) {
         if (awayScored || homeScored) {
           const scoringTeamName = awayScored ? awayName : homeName;
           const title = `SCORE UPDATE: ${awayName} vs ${homeName}`;
-          const body = `${scoringTeamName} scored! Score is now ${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
+          const body = `${scoringTeamName} scored! ... ${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
 
           console.log(`[ALERT] ${body}`);
           await triggerNotifications(event.id, away.team.id, home.team.id, title, body);
