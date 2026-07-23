@@ -5,12 +5,12 @@ on:
     # Runs every 2 hours EXCEPT between 2am EST (07:00 UTC) and 1pm EST (18:00 UTC)
     # Active UTC hours: 18:00, 20:00, 22:00, 00:00, 02:00, 04:00, 06:00
     - cron: '13 0,2,4,6,18,20,22 * * *'
-  workflow_dispatch: # Allows manual trigger anytime in your browser
+  workflow_dispatch: # Allows manual trigger anytime in your GitHub dashboard
 
 jobs:
   poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 10 # Kills the job if it hangs for more than 10 minutes
+    timeout-minutes: 20 # Increased to allow the 15-minute script loop to complete
 
     steps:
       - name: Checkout Code
