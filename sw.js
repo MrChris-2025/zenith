@@ -1,6 +1,7 @@
 // sw.js
 self.addEventListener('push', function(event) {
   let data = { title: 'Sports Update', body: 'New update available!', url: '/' };
+  
   if (event.data) {
     try {
       data = event.data.json();
@@ -8,6 +9,7 @@ self.addEventListener('push', function(event) {
       data.body = event.data.text();
     }
   }
+
   const options = {
     body: data.body,
     icon: '/icon-512.PNG',
@@ -16,18 +18,37 @@ self.addEventListener('push', function(event) {
     vibrate: [100, 50, 100],
     actions: [{ action: 'open', title: 'View Details' }]
   };
+
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
+
+  const targetUrl = new URL(event.notification.data.url, self.location.origin).href;
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        if ('focus' in client) return client.focus();
+      // 1. Check if a tab is already open with the exact target URL
+      for (const client of clientList) {
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
       }
-      if (clients.openWindow) return clients.openWindow(event.notification.data.url);
+
+      // 2. If a tab is open on the app, focus and navigate it to the new URL
+      if (clientList.length > 0) {
+        const client = clientList[0];
+        if ('focus' in client && 'navigate' in client) {
+          client.focus();
+          return client.navigate(targetUrl);
+        }
+      }
+
+      // 3. If no window/tab is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
     })
   );
 });
