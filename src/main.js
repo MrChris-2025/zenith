@@ -12,12 +12,18 @@ if (button && statusText) {
 
   button.addEventListener("click", () => {
     try {
-      logEvent(analytics, "custom_button_click", {
-        button_name: "actionBtn",
-        timestamp: Date.now()
-      });
-      statusText.textContent = "Success! Event logged to Analytics.";
-      statusText.style.color = "#2e7d32";
+      if (analytics) {
+        logEvent(analytics, "custom_button_click", {
+          button_name: "actionBtn",
+          timestamp: Date.now()
+        });
+        statusText.textContent = "Success! Event logged to Analytics.";
+        statusText.style.color = "#2e7d32";
+      } else {
+        console.warn("Analytics is disabled or unsupported in this browser.");
+        statusText.textContent = "Analytics not supported on this device.";
+        statusText.style.color = "#f57c00";
+      }
     } catch (error) {
       console.error("Telemetry failed:", error);
       statusText.textContent = "Error transmitting event.";
@@ -28,15 +34,20 @@ if (button && statusText) {
 
 if (notiBtn && tokenDisplay) {
   notiBtn.addEventListener("click", async () => {
+    if (!messaging) {
+      statusText.textContent = "Messaging is not supported on this browser/connection.";
+      statusText.style.color = "#c62828";
+      return;
+    }
+
     statusText.textContent = "Requesting permission...";
     const permission = await Notification.requestPermission();
     
     if (permission === "granted") {
       statusText.textContent = "Permission granted! Fetching push token...";
       try {
-        // Retrieve the FCM registration token 
         const token = await getToken(messaging, {
-          vapidKey: "BEgs6yLKrhZ9Ayb_R4jRVkEmwplVWgM4vGwXojCDCoyw1fvb-qaADXv_j-Xi5KRX4_VQqRxlxLuXoD5g09vQWlg" // Generate this in Settings > Cloud Messaging > Web Push certificates
+          vapidKey: "BEgs6yLKrhZ9Ayb_R4jRVkEmwplVWgM4vGwXojCDCoyw1fvb-qaADXv_j-Xi5KRX4_VQqRxlxLuXoD5g09vQWlg"
         });
         
         if (token) {
@@ -59,9 +70,15 @@ if (notiBtn && tokenDisplay) {
     }
   });
 
-  // Handle incoming messages while your website tab is open (foreground)
-  onMessage(messaging, (payload) => {
-    console.log("Foreground message received:", payload);
-    alert(`Incoming Notification:\n${payload.notification.title}\n${payload.notification.body}`);
-  });
+  // Attach listener safely if messaging is supported
+  if (messaging) {
+    onMessage(messaging, (payload) => {
+      console.log("Foreground message received:", payload);
+      
+      const title = payload.notification?.title || payload.data?.title || "Notification";
+      const body = payload.notification?.body || payload.data?.body || "";
+
+      alert(`Incoming Notification:\n${title}\n${body}`);
+    });
+  }
 }
