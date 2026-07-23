@@ -11,8 +11,6 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "web-push": "^3.6.7",
-    "http_ece": "^1.2.0",
-    "asn1.js": "^5.4.1"
+    "web-push": "^3.6.7"
   }
 }
