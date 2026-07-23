@@ -11,14 +11,19 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Display notification when the website is closed or in the background
+// Handle background messages
 messaging.onBackgroundMessage((payload) => {
-  console.log("Background message received: ", payload);
-  const notificationTitle = payload.notification.title;
+  console.log("[firebase-messaging-sw.js] Background message received: ", payload);
+
+  // Extract title/body safely from either notification or data payload
+  const notificationTitle = payload.notification?.title || payload.data?.title || "New Notification";
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/firebase-logo.png' // You can replace this with your icon path later
+    body: payload.notification?.body || payload.data?.body || "",
+    icon: '/firebase-logo.png'
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  // ONLY call showNotification manually if the server sends data-only payloads.
+  // If your server sends a 'notification' key in the FCM payload, 
+  // FCM displays it automatically and you can omit the line below.
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
