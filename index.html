@@ -1222,5 +1222,23 @@
     fetchScores(false);
     startAutoPolling();
   </script>
+
+
+
+
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "4770652a-0e63-4217-b3b8-59f6639af716",
+      });
+    });
+  </script>
+
+
+
+  
 </body>
 </html>
