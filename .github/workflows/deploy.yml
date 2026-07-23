@@ -16,14 +16,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm' # Or 'pnpm' / 'yarn' depending on your project
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      # Uncomment the step below if your app has a build step (React, Vite, Next.js, Vue, etc.)
-      # - name: Build app
-      #   run: npm run build
+      - name: Build app
+        run: npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
