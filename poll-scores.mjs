@@ -28,12 +28,12 @@ const messaging = getMessaging();
 
 const scoreCache = new Map();
 
+// Removed soccer configuration completely
 const SPORTS_CONFIG = [
   { sport: 'baseball', league: 'mlb' },
   { sport: 'football', league: 'nfl' },
   { sport: 'basketball', league: 'nba' },
-  { sport: 'hockey', league: 'nhl' },
-  { sport: 'soccer', league: 'eng.1' }
+  { sport: 'hockey', league: 'nhl' }
 ];
 
 async function checkScoresForSport(sport, league) {
@@ -146,7 +146,6 @@ async function runContinuous() {
       break;
     }
 
-    // Sleep for 15 seconds
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
   console.log('Cycle complete.');
