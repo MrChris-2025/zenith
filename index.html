@@ -754,7 +754,7 @@
       });
 
       onMessage(messaging, (payload) => {
-        showToast('fcm', 'PUSH ALERT', payload.notification.title, payload.notification.body);
+        showToast('fcm', 'PUSH ALERT', payload.notification?.title || 'Alert', payload.notification?.body || '');
       });
 
       if ('serviceWorker' in navigator) {
@@ -920,7 +920,7 @@
       const state = event.status?.type?.state;
       const gameDate = new Date(event.date);
 
-      if (state !== 'pre') return event.status.type.detail;
+      if (state !== 'pre') return event.status?.type?.detail || 'Live';
 
       const dateStr = `${gameDate.getMonth() + 1}/${gameDate.getDate()}`;
       const timeStr = gameDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -1044,12 +1044,21 @@
 
           if (awayScored || homeScored) {
             const scoringTeam = awayScored ? away : home;
+            const statusDetail = event.status?.type?.detail || 'Live';
+
             if (currentSport === 'baseball') {
-              checkMLBScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, event.status?.type?.detail);
+              checkMLBScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, statusDetail);
             } else if (currentSport === 'football') {
-              checkNFLScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, event.status?.type?.detail);
+              checkNFLScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, statusDetail);
             } else {
-              showToast(event.id, 'SCORE UPDATE', `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`, `${scoringTeam.team.displayName} scored!`, scoringTeam.team.logo);
+              // FIXED: Replaced undefined variable with `statusDetail`
+              showToast(
+                event.id, 
+                'SCORE UPDATE', 
+                `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${statusDetail})`, 
+                `${scoringTeam.team.displayName} scored!`, 
+                scoringTeam.team.logo
+              );
             }
           }
         }
@@ -1223,22 +1232,5 @@
     startAutoPolling();
   </script>
 
-
-
-
-
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "4770652a-0e63-4217-b3b8-59f6639af716",
-      });
-    });
-  </script>
-
-
-
-  
 </body>
 </html>
