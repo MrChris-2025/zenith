@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs every 2 hours EXCEPT between 2am EST (07:00 UTC) and 1pm EST (18:00 UTC)
     # Active UTC hours: 18:00, 20:00, 22:00, 00:00, 02:00, 04:00, 06:00
-    - cron: '0 0,2,4,6,18,20,22 * * *'
+    - cron: '13 0,2,4,6,18,20,22 * * *'
   workflow_dispatch: # Allows manual trigger anytime in your browser
 
 jobs:
