@@ -8,6 +8,7 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 }
 
 let secretStr = process.env.FIREBASE_SERVICE_ACCOUNT;
+// Sanitize smart/curly quotes
 secretStr = secretStr.replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"');
 secretStr = secretStr.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
 
@@ -15,7 +16,7 @@ let serviceAccount;
 try {
   serviceAccount = JSON.parse(secretStr);
 } catch (err) {
-  console.error("ERROR: Failed to parse credentials.");
+  console.error("ERROR: Failed to parse credentials. Make sure it is valid JSON.");
   process.exit(1);
 }
 
@@ -28,7 +29,6 @@ const messaging = getMessaging();
 
 const scoreCache = new Map();
 
-// Removed soccer configuration completely
 const SPORTS_CONFIG = [
   { sport: 'baseball', league: 'mlb' },
   { sport: 'football', league: 'nfl' },
@@ -43,6 +43,7 @@ async function checkScoresForSport(sport, league) {
   try {
     const response = await fetch(url);
     if (!response.ok) return false;
+
     const data = await response.json();
     const events = data.events || [];
 
@@ -52,17 +53,21 @@ async function checkScoresForSport(sport, league) {
         hasLiveGames = true;
       }
 
-      const competition = event.competitions[0];
-      const competitors = competition.competitors;
+      const competition = event.competitions?.[0];
+      if (!competition) continue;
+
+      const competitors = competition.competitors || [];
       const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
       const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+
+      if (!home || !away) continue;
 
       const currentAwayScore = Number(away.score || 0);
       const currentHomeScore = Number(home.score || 0);
       const inningStatusText = event.status?.type?.detail || '';
 
-      const awayName = away.team.shortDisplayName || away.team.displayName;
-      const homeName = home.team.shortDisplayName || home.team.displayName;
+      const awayName = away.team?.shortDisplayName || away.team?.displayName || 'Away';
+      const homeName = home.team?.shortDisplayName || home.team?.displayName || 'Home';
 
       if (scoreCache.has(event.id)) {
         const cached = scoreCache.get(event.id);
@@ -74,20 +79,23 @@ async function checkScoresForSport(sport, league) {
           const body = `${awayName} ${currentAwayScore} - ${currentHomeScore} ${homeName} (${inningStatusText})`;
 
           console.log(`[ALERT] ${body}`);
+          // Fire and await notification delivery
           await triggerNotifications(event.id, away.team.id, home.team.id, title, body);
         }
       }
 
+      // Update local cache
       scoreCache.set(event.id, {
         awayScore: currentAwayScore,
         homeScore: currentHomeScore
       });
 
+      // Sync latest score to Firestore
       await db.collection('game_states').doc(event.id).set({
         awayScore: currentAwayScore,
         homeScore: currentHomeScore,
         updatedAt: Date.now()
-      });
+      }, { merge: true });
     }
   } catch (err) {
     console.error(`Error polling ${sport}/${league}:`, err.message);
@@ -105,7 +113,11 @@ async function triggerNotifications(eventId, awayTeamId, homeTeamId, title, body
       `team_${homeTeamId}`
     ];
 
-    const snapshot = await db.collection('subscriptions').where('topic', 'in', targets).get();
+    // Firestore 'in' query supports up to 30 elements
+    const snapshot = await db.collection('subscriptions')
+      .where('topic', 'in', targets)
+      .get();
+
     if (snapshot.empty) return;
 
     snapshot.forEach(doc => {
@@ -116,13 +128,18 @@ async function triggerNotifications(eventId, awayTeamId, homeTeamId, title, body
     const tokens = Array.from(tokensSet);
     if (tokens.length === 0) return;
 
-    await messaging.sendEachForMulticast({
-      tokens: tokens,
-      notification: { title, body }
-    });
-    console.log(`Sent alerts to ${tokens.length} devices.`);
+    // Chunk tokens into batches of 500 (FCM Multicast Limit)
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
+      const tokenBatch = tokens.slice(i, i + BATCH_SIZE);
+      const response = await messaging.sendEachForMulticast({
+        tokens: tokenBatch,
+        notification: { title, body }
+      });
+      console.log(`Sent batch of ${tokenBatch.length} alerts. Success: ${response.successCount}, Failures: ${response.failureCount}`);
+    }
   } catch (err) {
-    console.error('Error sending push:', err);
+    console.error('Error sending push notification:', err);
   }
 }
 
@@ -142,10 +159,11 @@ async function runContinuous() {
     }
 
     if (!anySportLive) {
-      console.log('No active games in progress. Exiting loop to prevent rate-limiting.');
+      console.log('No active games in progress. Exiting loop to prevent unnecessary polling.');
       break;
     }
 
+    // Wait 15 seconds before the next check
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
   console.log('Cycle complete.');
