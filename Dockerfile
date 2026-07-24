@@ -9,13 +9,13 @@ WORKDIR /app
 # Copy package files first to leverage Docker layer caching
 COPY package*.json ./
 
-# Install dependencies (including dev dependencies for build step)
+# Install dependencies
 RUN npm install
 
 # Copy the rest of the application code
 COPY . .
 
-# Run build step (optional: comment out if you don't have a build script)
+# Run build step if a build script exists
 RUN npm run build --if-present
 
 # Prune dev dependencies to keep the image lightweight
@@ -36,8 +36,6 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
-COPY --from=builder /app/src ./src 2>/dev/null || true
-COPY --from=builder /app/index.js ./index.js 2>/dev/null || true
 
 # Expose the application port
 EXPOSE 8080
