@@ -714,13 +714,19 @@
       const pushBtn = document.getElementById('global-push-btn');
 
       if (fcmToken) {
-        pushBtn.textContent = "Alerts Active";
+        pushBtn.textContent = "Show Token / Active";
         pushBtn.style.opacity = "0.7";
       }
 
       pushBtn.addEventListener('click', async () => {
+        // If token already exists, allow tapping the button to copy it again directly on iPad
+        if (fcmToken) {
+          prompt("Copy your FCM Token below:", fcmToken);
+          return;
+        }
+
         if (typeof Notification === 'undefined') {
-          showToast('system', 'ERROR', 'Notifications are blocked in Safari. You must tap Share and select Add to Home Screen first!', '');
+          showToast('system', 'ERROR', 'Notifications are blocked in Safari. Tap Share and select Add to Home Screen first!', '');
           pushBtn.textContent = "Enable Alerts";
           return;
         }
@@ -734,8 +740,12 @@
             if (token) {
               fcmToken = token;
               localStorage.setItem('fcmToken', token);
-              pushBtn.textContent = "Alerts Active";
+              pushBtn.textContent = "Show Token / Active";
               pushBtn.style.opacity = "0.7";
+              
+              // Pop up standard iPad prompt containing FCM token for easy copy-pasting
+              prompt("Copy your FCM Token below:", token);
+
               showToast('system', 'ALERT', 'Push notifications active!', '');
               fetchScores(true);
             } else {
@@ -1051,7 +1061,6 @@
             } else if (currentSport === 'football') {
               checkNFLScoringPlays(event.id, awayName, homeName, currentAwayScore, currentHomeScore, scoringTeam.team.logo, statusDetail);
             } else {
-              // FIXED: Replaced undefined variable with `statusDetail`
               showToast(
                 event.id, 
                 'SCORE UPDATE', 
