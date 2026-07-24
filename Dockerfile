@@ -35,7 +35,7 @@ WORKDIR /app
 # Copy built application and node_modules from builder stage
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist 2>/dev/null || true
+COPY --from=builder /app/src ./src
 COPY --from=builder /app/src ./src 2>/dev/null || true
 COPY --from=builder /app/index.js ./index.js 2>/dev/null || true
 
